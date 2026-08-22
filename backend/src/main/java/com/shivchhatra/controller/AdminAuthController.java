@@ -12,10 +12,10 @@ import java.util.Map;
 @RequestMapping("/api/admin")
 public class AdminAuthController {
 
-    @Value("${shivchhatra.admin.passcode:shivchhatra2026}")
+    @Value("${shivchhatra.admin.passcode:Shivchhatra#9970$Sahyadri!2026}")
     private String masterPasscode;
 
-    @Value("${shivchhatra.admin.secret:shivchhatra-sahyadri-secret-master-token-key-2026}")
+    @Value("${shivchhatra.admin.secret:Shivchhatra#9970$Sahyadri!2026}")
     private String secretToken;
 
     @PostMapping("/login")
@@ -23,7 +23,7 @@ public class AdminAuthController {
         String passcode = body.get("passcode");
         Map<String, Object> response = new HashMap<>();
 
-        if (passcode != null && (passcode.equals(masterPasscode) || passcode.equals("admin123") || passcode.equals("1234"))) {
+        if (passcode != null && (passcode.equals(masterPasscode) || passcode.equals(secretToken))) {
             response.put("authenticated", true);
             response.put("token", secretToken);
             response.put("role", "SUPER_ADMIN");
@@ -33,7 +33,7 @@ public class AdminAuthController {
         }
 
         response.put("authenticated", false);
-        response.put("error", "Access Denied: Invalid Security Passcode");
+        response.put("error", "Access Denied: Invalid Master Security Passcode");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 

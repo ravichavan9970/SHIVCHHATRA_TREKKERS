@@ -9,10 +9,10 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class AdminAuthInterceptor implements HandlerInterceptor {
 
-    @Value("${shivchhatra.admin.passcode:shivchhatra2026}")
+    @Value("${shivchhatra.admin.passcode:Shivchhatra#9970$Sahyadri!2026}")
     private String adminPasscode;
 
-    @Value("${shivchhatra.admin.secret:shivchhatra-sahyadri-secret-master-token-key-2026}")
+    @Value("${shivchhatra.admin.secret:Shivchhatra#9970$Sahyadri!2026}")
     private String secretToken;
 
     @Override
@@ -42,7 +42,7 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\": \"Unauthorized: Valid Admin Token or Passcode required\"}");
+        response.getWriter().write("{\"error\": \"Unauthorized: Valid Master Admin Security Key required\"}");
         return false;
     }
 }

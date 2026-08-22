@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ShieldCheck, 
@@ -8,7 +8,8 @@ import {
   Sparkles,
   Server,
   Database,
-  CheckCircle2
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import { loginAdmin } from '../../services/api';
 
@@ -16,6 +17,25 @@ export default function AdminLoginGate({ onLoginSuccess }) {
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isServerOffline, setIsServerOffline] = useState(false);
+
+  useEffect(() => {
+    // Check if backend server is active
+    const checkServerStatus = async () => {
+      try {
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        const res = await fetch(`${apiBase}/treks`, { method: 'GET' });
+        if (!res.ok && res.status >= 500) {
+          setIsServerOffline(true);
+        } else {
+          setIsServerOffline(false);
+        }
+      } catch (err) {
+        setIsServerOffline(true);
+      }
+    };
+    checkServerStatus();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,17 +86,23 @@ export default function AdminLoginGate({ onLoginSuccess }) {
           </div>
         </div>
 
-        {/* Server & DB Status Badge */}
-        <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-2">
-            <Server className="w-4 h-4 text-emerald-400" />
-            <span className="text-slate-300 font-medium">Java Spring Boot</span>
-          </div>
-          <div className="flex items-center space-x-1 text-emerald-400 font-bold">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Port 8080 Active</span>
-          </div>
-        </div>
+        {/* Server Status Warning - Only shown if server is Non-Active / Offline */}
+        {isServerOffline && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-3 rounded-2xl bg-red-950/40 border border-red-500/40 flex items-center justify-between text-xs"
+          >
+            <div className="flex items-center space-x-2">
+              <Server className="w-4 h-4 text-red-400" />
+              <span className="text-slate-300 font-medium">Backend Server</span>
+            </div>
+            <div className="flex items-center space-x-1.5 text-red-400 font-bold">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+              <span>Non-Active / Offline</span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -92,7 +118,7 @@ export default function AdminLoginGate({ onLoginSuccess }) {
                 setPasscode(e.target.value);
                 setError('');
               }}
-              placeholder="Enter master passcode"
+              placeholder="Enter 30-character master passcode"
               className="w-full px-4 py-3.5 bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-2xl text-white placeholder-slate-500 text-sm font-mono tracking-widest focus:outline-none transition-all"
               autoFocus
             />
@@ -115,7 +141,7 @@ export default function AdminLoginGate({ onLoginSuccess }) {
             className="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-sm rounded-2xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
           >
             {isLoading ? (
-              <span>Authenticating Secure Token...</span>
+              <span>Authenticating Secure Key...</span>
             ) : (
               <>
                 <span>Unlock Master Console</span>
@@ -124,12 +150,6 @@ export default function AdminLoginGate({ onLoginSuccess }) {
             )}
           </button>
         </form>
-
-        <div className="pt-2 border-t border-slate-800 text-center">
-          <p className="text-[11px] text-slate-500">
-            Official System • Passcode documented in <code className="text-orange-400">credentials.txt</code>
-          </p>
-        </div>
       </motion.div>
     </div>
   );

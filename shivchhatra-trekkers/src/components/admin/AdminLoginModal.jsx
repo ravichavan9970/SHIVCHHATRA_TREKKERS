@@ -8,13 +8,13 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (pin.trim() === 'shivchhatra2026' || pin.trim() === 'admin123' || pin.trim() === '1234') {
+    if (pin.trim() === 'Shivchhatra#9970$Sahyadri!2026') {
       onLoginSuccess();
       setPin('');
       setError(false);
     } else {
       setError(true);
-      setTimeout(() => setError(false), 2000);
+      setTimeout(() => setError(false), 2500);
     }
   };
 
@@ -47,7 +47,7 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white"
+              className="p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -64,14 +64,14 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="text-xs text-slate-300 font-semibold block mb-1">Passcode / Master Key</label>
+              <label className="text-xs text-slate-300 font-semibold block mb-1">Master Security Key</label>
               <div className="relative">
                 <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input
                   type="password"
                   required
                   autoFocus
-                  placeholder="Enter admin passcode (Default: shivchhatra2026)"
+                  placeholder="Enter 30-character master passcode"
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
                   className={`w-full pl-10 pr-4 py-2.5 bg-slate-950 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
@@ -83,22 +83,18 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
 
             {error && (
               <p className="text-xs text-red-400 flex items-center space-x-1.5 animate-bounce">
-                <ShieldAlert className="w-4 h-4" />
-                <span>Invalid master passcode. (Demo default: <code>shivchhatra2026</code>)</span>
+                <ShieldAlert className="w-4 h-4 shrink-0" />
+                <span>Access Denied: Invalid master security key.</span>
               </p>
             )}
 
             <button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-2 transition-all"
+              className="w-full py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer"
             >
               <span>Unlock Admin Console</span>
               <ArrowRight className="w-4 h-4" />
             </button>
-
-            <p className="text-[11px] text-center text-slate-500">
-              Demo Access Key: <span className="font-mono text-orange-400 font-semibold">shivchhatra2026</span>
-            </p>
           </form>
         </motion.div>
       </div>
