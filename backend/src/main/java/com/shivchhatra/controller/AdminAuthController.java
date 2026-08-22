@@ -12,10 +12,10 @@ import java.util.Map;
 @RequestMapping("/api/admin")
 public class AdminAuthController {
 
-    @Value("${shivchhatra.admin.passcode:Shivchhatra#9970$Sahyadri!2026}")
+    @Value("${shivchhatra.admin.passcode:Shivchhatra#!*&+$Sahyadri!****2026}")
     private String masterPasscode;
 
-    @Value("${shivchhatra.admin.secret:Shivchhatra#9970$Sahyadri!2026}")
+    @Value("${shivchhatra.admin.secret:Shivchhatra#!*&+$Sahyadri!****2026}")
     private String secretToken;
 
     @PostMapping("/login")

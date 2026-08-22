@@ -9,10 +9,10 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class AdminAuthInterceptor implements HandlerInterceptor {
 
-    @Value("${shivchhatra.admin.passcode:Shivchhatra#9970$Sahyadri!2026}")
+    @Value("${shivchhatra.admin.passcode:Shivchhatra#!*&+$Sahyadri!****2026}")
     private String adminPasscode;
 
-    @Value("${shivchhatra.admin.secret:Shivchhatra#9970$Sahyadri!2026}")
+    @Value("${shivchhatra.admin.secret:Shivchhatra#!*&+$Sahyadri!****2026}")
     private String secretToken;
 
     @Override

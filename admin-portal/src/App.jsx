@@ -38,7 +38,7 @@ export default function App() {
   // Always lock by default unless explicitly authenticated via the Master Passcode
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const token = getAdminToken();
-    return !!token && token === 'Shivchhatra#9970$Sahyadri!2026';
+    return !!token && token === 'Shivchhatra#!*&+$Sahyadri!****2026';
   });
 
   const [activeTab, setActiveTab] = useState('treks'); // 'treks' | 'bookings' | 'reviews' | 'payment'
