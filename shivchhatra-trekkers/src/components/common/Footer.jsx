@@ -5,12 +5,12 @@ import {
   ShieldCheck, 
   Phone, 
   Mail, 
-  MapPin, 
   Heart, 
   ExternalLink,
   Lock,
   ArrowUpRight,
-  Sparkles
+  Sparkles,
+  MessageCircle
 } from 'lucide-react';
 
 export default function Footer() {
@@ -111,29 +111,63 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact & Support */}
+          {/* Connect & Support Buttons */}
           <div>
             <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 font-heading">
-              24/7 Helpline
+              Connect With Us
             </h4>
-            <div className="space-y-3 text-sm text-slate-400">
-              <div className="flex items-start space-x-2.5">
-                <Phone className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-white font-medium">+91 79727 33094</p>
-                  <p className="text-xs text-slate-500">Expedition Coordination</p>
-                </div>
-              </div>
+            <div className="flex flex-col space-y-2.5">
+              {/* WhatsApp Button */}
+              <a
+                href="https://wa.me/917972733094?text=Hi%20Shivchhatra%20Trekkers,%20I%20would%20like%20to%20inquire%20about%20upcoming%20treks!"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 hover:border-emerald-500 hover:bg-emerald-900/40 text-emerald-300 text-xs font-semibold transition-all group"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
+                <span>WhatsApp Chat</span>
+              </a>
 
-              <div className="flex items-start space-x-2.5">
-                <Mail className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-                <span className="text-slate-300 text-xs">info@shivchhatra.in</span>
-              </div>
+              {/* Call Helpline Button */}
+              <a
+                href="tel:+917972733094"
+                className="flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-orange-500/10 text-slate-200 text-xs font-semibold transition-all group"
+              >
+                <Phone className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+                <span>Call Helpline</span>
+              </a>
 
-              <div className="flex items-start space-x-2.5">
-                <MapPin className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-                <span className="text-slate-300 text-xs">Pune / Mumbai, Maharashtra</span>
-              </div>
+              {/* Email Us Button */}
+              <a
+                href="mailto:info@shivchhatra.in"
+                className="flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-orange-500/10 text-slate-200 text-xs font-semibold transition-all group"
+              >
+                <Mail className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+                <span>Email Us</span>
+              </a>
+
+              {/* Instagram Button */}
+              <a
+                href="https://www.instagram.com/roambeyond_?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-orange-500/10 border border-pink-500/30 hover:border-pink-500 hover:from-pink-500/20 hover:to-orange-500/20 text-pink-300 text-xs font-semibold transition-all group"
+              >
+                <svg
+                  className="w-4 h-4 text-pink-400 group-hover:scale-110 transition-transform shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+                <span>Instagram Profile</span>
+              </a>
             </div>
           </div>
 
@@ -147,7 +181,7 @@ export default function Footer() {
             <Link to="/track" className="hover:text-slate-300 transition-colors">UTR Verification</Link>
             <button 
               onClick={scrollToTop} 
-              className="text-orange-400 hover:text-orange-300 font-medium flex items-center space-x-1"
+              className="text-orange-400 hover:text-orange-300 font-medium flex items-center space-x-1 cursor-pointer"
             >
               <span>Back to top</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
