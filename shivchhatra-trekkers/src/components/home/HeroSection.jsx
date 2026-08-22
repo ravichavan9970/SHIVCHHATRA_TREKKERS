@@ -1,0 +1,188 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Compass, 
+  Mountain, 
+  ShieldCheck, 
+  MapPin, 
+  Calendar, 
+  Users, 
+  Star, 
+  ArrowRight,
+  Flame,
+  Search,
+  Sparkles,
+  ChevronDown
+} from 'lucide-react';
+import { useTreks } from '../../context/TrekContext';
+import { useBookings } from '../../context/BookingContext';
+import { useReviews } from '../../context/ReviewContext';
+
+export default function HeroSection({ onExploreClick }) {
+  const { treks, searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, categories } = useTreks();
+  const { bookings } = useBookings();
+  const { stats, openReviewModal } = useReviews();
+
+  const totalTrekkersCount = bookings
+    .filter(b => b.status !== 'Rejected')
+    .reduce((sum, b) => sum + (Number(b.participantsCount) || 1), 0);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (onExploreClick) onExploreClick();
+  };
+
+  return (
+    <section className="relative min-h-[95vh] flex items-center justify-center pt-28 pb-20 overflow-hidden bg-[#080c14]">
+      {/* Wallpaper Background Image with Cinematic Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, rgba(8, 12, 20, 0.65) 0%, rgba(8, 12, 20, 0.82) 65%, #080c14 100%), url('/hero_bg.jpg'), url('https://wallpaperaccess.com/full/11738414.jpg')`
+        }}
+      ></div>
+
+      {/* Subtle Topography Pattern Overlay */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none"></div>
+      
+      {/* Saffron & Emerald Ambient Glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-orange-600/20 rounded-full blur-[130px] pointer-events-none"></div>
+      <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-emerald-600/15 rounded-full blur-[110px] pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+        <div className="text-center max-w-4xl mx-auto space-y-6">
+          
+          {/* Top Badge with Framer Motion */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs sm:text-sm font-semibold tracking-wide shadow-sm"
+          >
+            <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
+            <span>🚩 सह्याद्रीचे शिलेदार • Maharashtra's Premier Adventure Club</span>
+          </motion.div>
+
+          {/* Main Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white font-heading leading-[1.1]"
+          >
+            Chhatrapati’s Footsteps, <br />
+            <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent drop-shadow-sm">
+              Sahyadri’s Majestic Heights.
+            </span>
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed"
+          >
+            Experience authentic high-altitude fort expeditions, thrilling ridge traverses, and ancient rock staircases guided by certified mountaineers with 100% verified safety.
+          </motion.p>
+
+          {/* Quick Search & Filter Widget */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="pt-2 max-w-3xl mx-auto"
+          >
+            <form 
+              onSubmit={handleSearchSubmit}
+              className="p-2 sm:p-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-2xl backdrop-blur-xl flex flex-col sm:flex-row items-center gap-2"
+            >
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search by fort, peak, or region (e.g. Rajgad, Kalsubai...)"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full sm:w-auto px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-300 focus:outline-none focus:border-orange-500"
+                >
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat} className="bg-slate-900 text-white">
+                      {cat === 'All' ? 'All Categories' : cat}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-2 shrink-0 transition-all hover:scale-102"
+                >
+                  <span>Explore</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+          </motion.div>
+
+          {/* Real Dynamic Live Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto"
+          >
+            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm">
+              <p className="text-2xl sm:text-3xl font-extrabold text-orange-400 font-heading">
+                {treks.length}
+              </p>
+              <p className="text-xs text-slate-400 font-medium">Active Fort Expeditions</p>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm">
+              <p className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-heading">
+                {totalTrekkersCount > 0 ? totalTrekkersCount : 0}
+              </p>
+              <p className="text-xs text-slate-400 font-medium">Verified Trekkers</p>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm">
+              <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-heading">100%</p>
+              <p className="text-xs text-slate-400 font-medium">Verified UPI Gateway</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openReviewModal()}
+              className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 hover:border-yellow-500/50 backdrop-blur-sm transition-all group text-center cursor-pointer"
+              title="Click to Rate or Review"
+            >
+              <div className="flex items-center justify-center space-x-1">
+                <span className="text-2xl sm:text-3xl font-extrabold text-yellow-400 font-heading">
+                  {stats.averageRating}
+                </span>
+                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 inline" />
+              </div>
+              <p className="text-xs text-slate-400 group-hover:text-yellow-400 transition-colors font-medium flex items-center justify-center space-x-1">
+                <span>{stats.totalReviews} Trekker Reviews</span>
+              </p>
+            </button>
+          </motion.div>
+
+        </div>
+      </div>
+
+      {/* Down Arrow indicator */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-slate-500 animate-bounce">
+        <ChevronDown className="w-6 h-6" />
+      </div>
+    </section>
+  );
+}

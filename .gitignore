@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+target/
+*.jar
+*.war
+
+# Database storage only (Do NOT ignore src/data)
+/backend/data/
+/data/
+*.db
+*.mv.db
+*.trace.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Local Secrets
+.env.local
+.env.*.local
+
+# IDE & Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Temp & Artifacts
+.system_generated/
+scratch/
+tmp/
+temp/

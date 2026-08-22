@@ -1,0 +1,14 @@
+{
+  "name": "shivchhatra-trekkers-enterprise-suite",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && java -jar target/shivchhatra-backend-1.0.0.jar",
+    "dev:client": "cd shivchhatra-trekkers && npm run dev",
+    "dev:admin": "cd admin-portal && npm run dev",
+    "build:backend": "cd backend && mvn clean package -DskipTests",
+    "build:client": "cd shivchhatra-trekkers && npm run build",
+    "build:admin": "cd admin-portal && npm run build",
+    "build:all": "npm run build:backend && npm run build:client && npm run build:admin"
+  }
+}
