@@ -40,39 +40,39 @@ export default function WhyChooseUs() {
   ];
 
   return (
-    <section className="py-20 bg-[#090d16] relative overflow-hidden border-t border-slate-800/80">
+    <section className="py-14 sm:py-20 bg-[#090d16] relative overflow-hidden border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 space-y-2.5 sm:space-y-3">
           <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
             <Award className="w-3.5 h-3.5" />
             <span>UNCOMPROMISING SAFETY & INTEGRITY</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-heading">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-heading">
             Why 15,000+ Trekkers Choose Shivchhatra
           </h2>
-          <p className="text-sm sm:text-base text-slate-400">
+          <p className="text-xs sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
             Adventure in the Sahyadris should be thrilling, not risky. We combine technical mountaineering discipline with pure Maharashtrian hospitality.
           </p>
         </div>
 
         {/* 4 Pillars Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {pillars.map((pillar, idx) => {
             const Icon = pillar.icon;
             return (
               <motion.div
                 key={idx}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
-                className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 backdrop-blur-sm space-y-4 flex flex-col justify-between"
+                className="p-5 sm:p-6 rounded-3xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 backdrop-blur-sm space-y-4 flex flex-col justify-between"
               >
-                <div className="space-y-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${pillar.color}`}>
-                    <Icon className="w-6 h-6" />
+                <div className="space-y-3 sm:space-y-4">
+                  <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center border ${pillar.color}`}>
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-white font-heading">
+                  <h3 className="text-base sm:text-lg font-bold text-white font-heading">
                     {pillar.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
@@ -80,7 +80,7 @@ export default function WhyChooseUs() {
                   </p>
                 </div>
 
-                <div className="pt-2 flex items-center space-x-1 text-xs text-slate-500 font-medium">
+                <div className="pt-2 flex items-center space-x-1 text-xs text-slate-500 font-medium border-t border-slate-800/60">
                   <BadgeCheck className="w-4 h-4 text-emerald-400" />
                   <span>Verified Standard</span>
                 </div>

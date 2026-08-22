@@ -33,12 +33,12 @@ export default function HeroSection({ onExploreClick }) {
   };
 
   return (
-    <section className="relative min-h-[95vh] flex items-center justify-center pt-28 pb-20 overflow-hidden bg-[#080c14]">
+    <section className="relative min-h-[92vh] sm:min-h-[95vh] flex items-center justify-center pt-24 sm:pt-28 pb-14 sm:pb-20 overflow-hidden bg-[#080c14]">
       {/* Wallpaper Background Image with Cinematic Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 pointer-events-none"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(8, 12, 20, 0.65) 0%, rgba(8, 12, 20, 0.82) 65%, #080c14 100%), url('/hero_bg.jpg'), url('https://wallpaperaccess.com/full/11738414.jpg')`
+          backgroundImage: `linear-gradient(to bottom, rgba(8, 12, 20, 0.68) 0%, rgba(8, 12, 20, 0.84) 65%, #080c14 100%), url('/hero_bg.jpg'), url('https://wallpaperaccess.com/full/11738414.jpg')`
         }}
       ></div>
 
@@ -46,18 +46,18 @@ export default function HeroSection({ onExploreClick }) {
       <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none"></div>
       
       {/* Saffron & Emerald Ambient Glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-orange-600/20 rounded-full blur-[130px] pointer-events-none"></div>
-      <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-emerald-600/15 rounded-full blur-[110px] pointer-events-none"></div>
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[700px] h-[300px] sm:h-[500px] bg-orange-600/20 rounded-full blur-[100px] sm:blur-[130px] pointer-events-none"></div>
+      <div className="absolute bottom-10 right-10 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-emerald-600/15 rounded-full blur-[90px] sm:blur-[110px] pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-        <div className="text-center max-w-4xl mx-auto space-y-6">
+        <div className="text-center max-w-4xl mx-auto space-y-4 sm:space-y-6">
           
           {/* Top Badge with Framer Motion */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs sm:text-sm font-semibold tracking-wide shadow-sm"
+            transition={{ duration: 0.4 }}
+            className="inline-flex items-center space-x-1.5 sm:space-x-2 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-[11px] sm:text-sm font-semibold tracking-wide shadow-sm"
           >
             <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
             <span>🚩 सह्याद्रीचे शिलेदार • Maharashtra's Premier Adventure Club</span>
@@ -65,10 +65,10 @@ export default function HeroSection({ onExploreClick }) {
 
           {/* Main Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 25 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white font-heading leading-[1.1]"
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-3xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white font-heading leading-[1.15] sm:leading-[1.1]"
           >
             Chhatrapati’s Footsteps, <br />
             <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent drop-shadow-sm">
@@ -78,20 +78,20 @@ export default function HeroSection({ onExploreClick }) {
 
           {/* Subtitle */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed"
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-slate-300 text-xs sm:text-lg max-w-2xl mx-auto leading-relaxed px-2"
           >
             Experience authentic high-altitude fort expeditions, thrilling ridge traverses, and ancient rock staircases guided by certified mountaineers with 100% verified safety.
           </motion.p>
 
           {/* Quick Search & Filter Widget */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="pt-2 max-w-3xl mx-auto"
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="pt-1 sm:pt-2 max-w-3xl mx-auto"
           >
             <form 
               onSubmit={handleSearchSubmit}
@@ -101,10 +101,10 @@ export default function HeroSection({ onExploreClick }) {
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search by fort, peak, or region (e.g. Rajgad, Kalsubai...)"
+                  placeholder="Search by fort, peak, or region..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
                 />
               </div>
 
@@ -123,7 +123,7 @@ export default function HeroSection({ onExploreClick }) {
 
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-2 shrink-0 transition-all hover:scale-102"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-2 shrink-0 transition-all hover:scale-102"
                 >
                   <span>Explore</span>
                   <ArrowRight className="w-4 h-4" />
@@ -134,43 +134,43 @@ export default function HeroSection({ onExploreClick }) {
 
           {/* Real Dynamic Live Stats */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto"
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="pt-4 sm:pt-6 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 max-w-4xl mx-auto"
           >
-            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm">
-              <p className="text-2xl sm:text-3xl font-extrabold text-orange-400 font-heading">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm">
+              <p className="text-xl sm:text-3xl font-extrabold text-orange-400 font-heading">
                 {treks.length}
               </p>
-              <p className="text-xs text-slate-400 font-medium">Active Fort Expeditions</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 font-medium mt-0.5">Active Expeditions</p>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm">
-              <p className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-heading">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm">
+              <p className="text-xl sm:text-3xl font-extrabold text-amber-400 font-heading">
                 {totalTrekkersCount > 0 ? totalTrekkersCount : 0}
               </p>
-              <p className="text-xs text-slate-400 font-medium">Verified Trekkers</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 font-medium mt-0.5">Verified Trekkers</p>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm">
-              <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-heading">100%</p>
-              <p className="text-xs text-slate-400 font-medium">Verified UPI Gateway</p>
+            <div className="p-3 sm:p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm">
+              <p className="text-xl sm:text-3xl font-extrabold text-emerald-400 font-heading">100%</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 font-medium mt-0.5">Verified UPI Gateway</p>
             </div>
 
             <button
               type="button"
               onClick={() => openReviewModal()}
-              className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 hover:border-yellow-500/50 backdrop-blur-sm transition-all group text-center cursor-pointer"
+              className="p-3 sm:p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/80 hover:border-yellow-500/50 backdrop-blur-sm transition-all group text-center cursor-pointer"
               title="Click to Rate or Review"
             >
               <div className="flex items-center justify-center space-x-1">
-                <span className="text-2xl sm:text-3xl font-extrabold text-yellow-400 font-heading">
+                <span className="text-xl sm:text-3xl font-extrabold text-yellow-400 font-heading">
                   {stats.averageRating}
                 </span>
-                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 inline" />
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400 inline" />
               </div>
-              <p className="text-xs text-slate-400 group-hover:text-yellow-400 transition-colors font-medium flex items-center justify-center space-x-1">
+              <p className="text-[10px] sm:text-xs text-slate-400 group-hover:text-yellow-400 transition-colors font-medium flex items-center justify-center space-x-1 mt-0.5">
                 <span>{stats.totalReviews} Trekker Reviews</span>
               </p>
             </button>
@@ -180,7 +180,7 @@ export default function HeroSection({ onExploreClick }) {
       </div>
 
       {/* Down Arrow indicator */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-slate-500 animate-bounce">
+      <div className="hidden sm:block absolute bottom-3 left-1/2 -translate-x-1/2 text-slate-500 animate-bounce">
         <ChevronDown className="w-6 h-6" />
       </div>
     </section>

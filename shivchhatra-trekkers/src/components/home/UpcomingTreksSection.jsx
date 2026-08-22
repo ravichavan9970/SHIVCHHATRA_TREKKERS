@@ -7,10 +7,12 @@ import {
   Flame, 
   Compass, 
   SlidersHorizontal,
-  RotateCcw
+  RotateCcw,
+  ArrowRight
 } from 'lucide-react';
 import { useTreks } from '../../context/TrekContext';
 import TrekCard from '../trek/TrekCard';
+import { Link } from 'react-router-dom';
 
 export default function UpcomingTreksSection({ onSelectTrek }) {
   const { 
@@ -39,7 +41,7 @@ export default function UpcomingTreksSection({ onSelectTrek }) {
   const difficulties = ['All', 'Easy', 'Moderate', 'Hard'];
 
   return (
-    <section id="upcoming-treks" className="py-20 bg-[#090d16] relative overflow-hidden">
+    <section id="upcoming-treks" className="py-14 sm:py-20 bg-[#090d16] relative overflow-hidden">
       {/* Background Decorative Gradients */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-orange-600/5 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-600/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -47,16 +49,16 @@ export default function UpcomingTreksSection({ onSelectTrek }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-10">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-semibold">
               <Flame className="w-3.5 h-3.5 fill-orange-400" />
               <span>UPCOMING EXPEDITIONS</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-heading">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-heading">
               Upcoming Batches & Weekend Trails
             </h2>
-            <p className="text-sm sm:text-base text-slate-400">
+            <p className="text-xs sm:text-base text-slate-400">
               Hand-crafted Sahyadri expeditions with certified leaders, safety equipment, transport, and authentic village meals.
             </p>
           </div>
@@ -65,7 +67,7 @@ export default function UpcomingTreksSection({ onSelectTrek }) {
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                 showFilters 
                   ? 'bg-orange-500/15 border-orange-500/40 text-orange-300' 
                   : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white'
@@ -84,7 +86,7 @@ export default function UpcomingTreksSection({ onSelectTrek }) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 mb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 backdrop-blur-xl shadow-2xl"
+              className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 mb-8 sm:mb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 backdrop-blur-xl shadow-2xl"
             >
               {/* Search Bar */}
               <div>
@@ -150,10 +152,10 @@ export default function UpcomingTreksSection({ onSelectTrek }) {
               </div>
 
               {/* Reset action */}
-              <div className="flex items-end">
+              <div className="sm:col-span-2 lg:col-span-4 flex justify-end">
                 <button
                   onClick={resetAllFilters}
-                  className="flex items-center justify-center space-x-1.5 w-full py-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-300 transition-all"
+                  className="flex items-center justify-center space-x-1.5 px-4 py-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-300 transition-all cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-orange-400" />
                   <span>Reset All Filters</span>
@@ -165,19 +167,28 @@ export default function UpcomingTreksSection({ onSelectTrek }) {
 
         {/* Treks Grid */}
         {treks.length === 0 ? (
-          <div className="text-center py-16 px-4 rounded-3xl bg-slate-900/40 border border-slate-800/80 space-y-4 max-w-lg mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center mx-auto text-2xl">
+          <div className="text-center py-12 sm:py-16 px-4 rounded-3xl bg-slate-900/40 border border-slate-800/80 space-y-4 max-w-lg mx-auto">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center mx-auto text-2xl">
               🚩
             </div>
-            <h3 className="text-lg font-bold text-white font-heading">No Expeditions Currently Scheduled</h3>
-            <p className="text-xs text-slate-400">
-              All upcoming batches have concluded or new Sahyadri routes are being scheduled. Check back soon!
+            <h3 className="text-base sm:text-lg font-bold text-white font-heading">New Weekend Batches Opening Soon</h3>
+            <p className="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
+              Our expedition leaders are curating the upcoming weekend monsoon & heritage fort routes. Explore our sacred fortress guides below!
             </p>
+            <div className="pt-2">
+              <Link
+                to="/forts"
+                className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition-all shadow-md shadow-orange-600/30"
+              >
+                <span>Explore Fort Heritage</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
         ) : filteredTreks.length > 0 ? (
           <motion.div 
             layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8"
           >
             <AnimatePresence>
               {filteredTreks.map((trek) => (
@@ -190,17 +201,17 @@ export default function UpcomingTreksSection({ onSelectTrek }) {
             </AnimatePresence>
           </motion.div>
         ) : (
-          <div className="text-center py-16 px-4 rounded-3xl bg-slate-900/40 border border-slate-800/80 space-y-4 max-w-lg mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center mx-auto text-2xl">
+          <div className="text-center py-12 sm:py-16 px-4 rounded-3xl bg-slate-900/40 border border-slate-800/80 space-y-4 max-w-lg mx-auto">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center mx-auto text-2xl">
               🏔️
             </div>
-            <h3 className="text-lg font-bold text-white font-heading">No Expeditions Match Your Filter</h3>
+            <h3 className="text-base sm:text-lg font-bold text-white font-heading">No Expeditions Match Your Filter</h3>
             <p className="text-xs text-slate-400">
               Try adjusting your search query, difficulty, or price range to find available upcoming Sahyadri treks.
             </p>
             <button
               onClick={resetAllFilters}
-              className="px-5 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold shadow-md shadow-orange-500/30"
+              className="px-5 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold shadow-md shadow-orange-500/30 cursor-pointer"
             >
               Reset Filters
             </button>

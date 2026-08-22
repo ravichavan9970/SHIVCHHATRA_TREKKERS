@@ -88,8 +88,8 @@ export default function GearChecklistSection() {
                       <div class="item">
                         <span style="font-weight: bold; font-family: monospace; font-size: 12px; color: ${isChecked ? '#16a34a' : '#94a3b8'};">${isChecked ? '☑' : '☐'}</span>
                         <div style="flex: 1;">
-                          <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="item-name" style="${isChecked ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${item.name}</span>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span class="item-name ${isChecked ? 'line-through' : ''}">${item.name}</span>
                             ${item.mandatory ? '<span class="mandatory">Mandatory</span>' : ''}
                           </div>
                           ${item.tip ? `<div class="item-tip">${item.tip}</div>` : ''}
@@ -102,21 +102,19 @@ export default function GearChecklistSection() {
             `).join('')}
 
             <div class="footer">
-              🚩 Follow Leave No Trace (LNT) Principles • Keep Sahyadri Clean & Sacred • Certified Wilderness Guides
+              🚩 Jai Shivray! Be safe, respect fort sanctity, and leave no trace in the Sahyadris.
             </div>
 
             <script>
               window.onload = function() {
                 window.focus();
                 window.print();
-                window.onafterprint = function() { window.close(); };
               };
             </script>
           </body>
         </html>
       `;
 
-      printWindow.document.open();
       printWindow.document.write(htmlContent);
       printWindow.document.close();
     } catch (e) {
@@ -129,26 +127,26 @@ export default function GearChecklistSection() {
   };
 
   return (
-    <section id="gear-checklist" className="py-20 bg-[#080c14] relative overflow-hidden border-t border-slate-800/80">
+    <section id="gear-checklist" className="py-14 sm:py-20 bg-[#080c14] relative overflow-hidden border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 sm:mb-12">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-semibold">
               <CheckSquare className="w-3.5 h-3.5" />
               <span>EXPEDITION PREPARATION</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-heading">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-heading">
               Interactive Gear & Packing Checklist
             </h2>
-            <p className="text-sm sm:text-base text-slate-400">
+            <p className="text-xs sm:text-base text-slate-400">
               Tick off your essential gear before departing. Being well-equipped ensures comfort, safety, and an unforgettable mountain experience.
             </p>
           </div>
 
           {/* Packing Progress Card */}
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md min-w-[260px] space-y-2">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md w-full sm:w-auto sm:min-w-[260px] space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold">
               <span className="text-slate-300">Packing Readiness</span>
               <span className="text-orange-400 font-bold">{progressPercent}% Ready</span>
@@ -163,7 +161,7 @@ export default function GearChecklistSection() {
               <span>{packedItemsCount} of {totalItemsCount} packed</span>
               <button
                 onClick={resetChecklist}
-                className="text-slate-500 hover:text-slate-300 flex items-center space-x-1"
+                className="text-slate-500 hover:text-slate-300 flex items-center space-x-1 cursor-pointer"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Reset</span>
@@ -172,17 +170,17 @@ export default function GearChecklistSection() {
           </div>
         </div>
 
-        {/* Category Selector Tabs */}
-        <div className="flex items-center space-x-2 overflow-x-auto pb-4 scrollbar-none mb-6">
+        {/* Category Selector Tabs (Scrollable on mobile) */}
+        <div className="flex items-center space-x-2 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none mb-6">
           {gearChecklist.map((cat) => {
             const isSelected = activeCategory === cat.category;
             return (
               <button
                 key={cat.category}
                 onClick={() => setActiveCategory(cat.category)}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
+                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
                   isSelected
-                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                    ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg shadow-orange-950/40'
                     : 'bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-white'
                 }`}
               >
@@ -193,7 +191,7 @@ export default function GearChecklistSection() {
         </div>
 
         {/* Active Checklist Items Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {currentCategoryData.items.map((item, idx) => {
             const key = `${activeCategory}_${item.name}`;
             const isChecked = !!checkedItems[key];
@@ -202,7 +200,7 @@ export default function GearChecklistSection() {
                 key={idx}
                 whileTap={{ scale: 0.99 }}
                 onClick={() => toggleItem(activeCategory, item.name)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all duration-200 flex items-start space-x-3.5 ${
+                className={`p-3.5 sm:p-4 rounded-2xl border cursor-pointer transition-all duration-200 flex items-start space-x-3 ${
                   isChecked
                     ? 'bg-emerald-950/20 border-emerald-500/40 text-slate-200'
                     : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 text-slate-300'
@@ -222,7 +220,7 @@ export default function GearChecklistSection() {
                       {item.name}
                     </p>
                     {item.mandatory && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/15 text-red-400 border border-red-500/30 shrink-0">
+                      <span className="px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold bg-red-500/15 text-red-400 border border-red-500/30 shrink-0">
                         Mandatory
                       </span>
                     )}
@@ -230,7 +228,7 @@ export default function GearChecklistSection() {
                   {item.tip && (
                     <p className="text-[11px] text-slate-400 flex items-center space-x-1">
                       <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" />
-                      <span>{item.tip}</span>
+                      <span className="leading-tight">{item.tip}</span>
                     </p>
                   )}
                 </div>
@@ -240,94 +238,22 @@ export default function GearChecklistSection() {
         </div>
 
         {/* Bottom Actions */}
-        <div className="mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-400 flex items-center space-x-1.5">
-            <Sparkles className="w-4 h-4 text-orange-400" />
+        <div className="mt-6 sm:mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-slate-400 flex items-center space-x-1.5 text-center sm:text-left">
+            <Sparkles className="w-4 h-4 text-orange-400 shrink-0" />
             <span>Need gear rental (tents/sleeping bags)? Add it during checkout!</span>
           </p>
 
           <button
             onClick={handlePrint}
-            className="flex items-center space-x-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white transition-all shadow-md hover:border-orange-500/50 cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-orange-500/50 text-slate-200 text-xs font-semibold flex items-center justify-center space-x-2 transition-all cursor-pointer"
           >
             <Printer className="w-4 h-4 text-orange-400" />
-            <span>Print Packing Checklist</span>
+            <span>Print / Save Checklist PDF</span>
           </button>
         </div>
 
       </div>
-
-      {/* ========================================================================= */}
-      {/* DEDICATED PRINTABLE CHECKLIST TEMPLATE (VISIBLE ONLY DURING PRINTING) */}
-      {/* ========================================================================= */}
-      <div id="printable-gear-checklist" className="hidden">
-        <div className="border-b-2 border-orange-600 pb-4 mb-6 flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              SHIVCHHATRA TREKKERS (शिवछत्र ट्रेकर्स)
-            </h1>
-            <p className="text-xs font-bold text-orange-600 tracking-wide uppercase mt-0.5">
-              Official Sahyadri Expedition Packing Checklist
-            </p>
-            <p className="text-xs text-slate-600 mt-1">
-              Helpline & WhatsApp Coordination: +91 79727 33094 • www.shivchhatratrekkers.com
-            </p>
-          </div>
-          <div className="text-right">
-            <span className="text-xs font-bold px-2 py-1 bg-slate-100 rounded border border-slate-300">
-              Readiness: {progressPercent}% ({packedItemsCount}/{totalItemsCount} Packed)
-            </span>
-          </div>
-        </div>
-
-        <div className="space-y-6 text-slate-900">
-          {gearChecklist.map((cat, cIdx) => (
-            <div key={cIdx} className="space-y-2">
-              <h3 className="text-sm font-bold uppercase tracking-wider bg-slate-100 px-3 py-1.5 border-l-4 border-orange-500">
-                {cat.category}
-              </h3>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {cat.items.map((item, iIdx) => {
-                  const key = `${cat.category}_${item.name}`;
-                  const isChecked = !!checkedItems[key];
-                  return (
-                    <div 
-                      key={iIdx} 
-                      className="p-2 border border-slate-200 rounded flex items-start space-x-2"
-                    >
-                      <span className="font-mono text-sm font-bold mt-0.5">
-                        {isChecked ? '[✓]' : '[  ]'}
-                      </span>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className={`font-semibold ${isChecked ? 'line-through text-slate-500' : 'text-slate-900'}`}>
-                            {item.name}
-                          </span>
-                          {item.mandatory && (
-                            <span className="text-[10px] font-bold text-red-600 uppercase border border-red-200 px-1 rounded bg-red-50">
-                              Mandatory
-                            </span>
-                          )}
-                        </div>
-                        {item.tip && (
-                          <p className="text-[10px] text-slate-500 mt-0.5">
-                            Tip: {item.tip}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-8 pt-4 border-t border-slate-300 text-center text-[10px] text-slate-500">
-          <p>🚩 Preserve Sahyadri Sanctity • Follow Leave No Trace (LNT) Principles • Certified Mountain Guides</p>
-        </div>
-      </div>
-
     </section>
   );
 }
