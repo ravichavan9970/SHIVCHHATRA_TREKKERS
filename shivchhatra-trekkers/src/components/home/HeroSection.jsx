@@ -112,7 +112,7 @@ export default function HeroSection({ onExploreClick }) {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full sm:w-auto px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-300 focus:outline-none focus:border-orange-500"
+                  className="flex-1 sm:w-auto px-3 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-300 focus:outline-none focus:border-orange-500 min-w-0"
                 >
                   {categories.map((cat) => (
                     <option key={cat} value={cat} className="bg-slate-900 text-white">
@@ -123,7 +123,7 @@ export default function HeroSection({ onExploreClick }) {
 
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-2 shrink-0 transition-all hover:scale-102"
+                  className="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-1.5 shrink-0 transition-all hover:scale-102 cursor-pointer"
                 >
                   <span>Explore</span>
                   <ArrowRight className="w-4 h-4" />
