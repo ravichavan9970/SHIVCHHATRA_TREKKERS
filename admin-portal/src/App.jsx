@@ -28,7 +28,6 @@ import PaymentScannerSettings from './components/admin/PaymentScannerSettings';
 import GalleryManager from './components/admin/GalleryManager';
 import FortHeritageManager from './components/admin/FortHeritageManager';
 import { 
-  getAdminToken, 
   clearAdminToken, 
   fetchAdminTreks, 
   fetchAdminBookings, 
@@ -36,12 +35,8 @@ import {
 } from './services/api';
 
 export default function App() {
-  // Always lock by default unless explicitly authenticated via the Master Passcode
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const token = getAdminToken();
-    return !!token && (token === 'ShivPasss!****2026' || token === 'Shivchhatra#!*&+$Sahyadri!****2026');
-  });
-
+  // STRICT: ALWAYS start locked behind the password gate on every visit/refresh
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('treks'); // 'treks' | 'bookings' | 'reviews' | 'payment'
 
   const [metrics, setMetrics] = useState({
@@ -83,14 +78,6 @@ export default function App() {
       loadMetrics();
     }
   }, [isAuthenticated, activeTab]);
-
-  useEffect(() => {
-    const handleAuthFailed = () => {
-      setIsAuthenticated(false);
-    };
-    window.addEventListener('admin_auth_failed', handleAuthFailed);
-    return () => window.removeEventListener('admin_auth_failed', handleAuthFailed);
-  }, []);
 
   const handleLogout = () => {
     clearAdminToken();

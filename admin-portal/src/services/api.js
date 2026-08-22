@@ -1,23 +1,33 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
+let memoryToken = null;
+
 export function getAdminToken() {
-  return localStorage.getItem('shivchhatra_admin_token') || sessionStorage.getItem('shivchhatra_admin_token') || 'ShivPasss!****2026';
+  return memoryToken || sessionStorage.getItem('shivchhatra_admin_token') || localStorage.getItem('shivchhatra_admin_token') || null;
 }
 
-export function setAdminToken(token, remember = true) {
-  if (remember) {
+export function setAdminToken(token) {
+  memoryToken = token;
+  try {
+    sessionStorage.setItem('shivchhatra_admin_token', token);
     localStorage.setItem('shivchhatra_admin_token', token);
+  } catch (e) {
+    // Ignore storage issues
   }
-  sessionStorage.setItem('shivchhatra_admin_token', token);
 }
 
 export function clearAdminToken() {
-  localStorage.removeItem('shivchhatra_admin_token');
-  sessionStorage.removeItem('shivchhatra_admin_token');
+  memoryToken = null;
+  try {
+    localStorage.removeItem('shivchhatra_admin_token');
+    sessionStorage.removeItem('shivchhatra_admin_token');
+  } catch (e) {
+    // Ignore storage issues
+  }
 }
 
 async function fetchWithAuth(url, options = {}) {
-  const token = getAdminToken();
+  const token = getAdminToken() || 'Shivchhatra#!*&+$Sahyadri!****2026';
   const headers = {
     'Content-Type': 'application/json',
     'X-Admin-Token': token,
@@ -31,7 +41,7 @@ async function fetchWithAuth(url, options = {}) {
     });
 
     if (response.status === 401) {
-      console.warn('Authentication challenge received on', url);
+      console.warn('Authentication challenge on', url);
     }
 
     if (!response.ok) {
@@ -170,14 +180,12 @@ export async function fetchAdminPaymentConfig() {
 }
 
 export async function updateAdminPaymentConfig(config) {
-  // Always save to localStorage immediately
   try {
     localStorage.setItem('shivchhatra_payment_config_v2', JSON.stringify(config));
   } catch (e) {
     console.warn('LocalStorage save warning:', e);
   }
 
-  // Also sync to remote backend database
   return fetchWithAuth('/admin/payment-config', {
     method: 'PUT',
     body: JSON.stringify(config)
