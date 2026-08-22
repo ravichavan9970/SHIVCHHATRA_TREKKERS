@@ -7,7 +7,8 @@ import {
   Sparkles, 
   AlertCircle, 
   RotateCcw,
-  CheckCircle2
+  CheckCircle2,
+  Check
 } from 'lucide-react';
 import { gearChecklist } from '../../data/safetyRules';
 
@@ -127,29 +128,29 @@ export default function GearChecklistSection() {
   };
 
   return (
-    <section id="gear-checklist" className="py-14 sm:py-20 bg-[#080c14] relative overflow-hidden border-t border-slate-800/80">
+    <section id="gear-checklist" className="py-10 sm:py-20 bg-[#080c14] relative overflow-hidden border-t border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 sm:mb-12">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-semibold">
-              <CheckSquare className="w-3.5 h-3.5" />
+        {/* Section Header & Compact Progress */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
+          <div className="space-y-1.5 sm:space-y-2 max-w-2xl">
+            <div className="inline-flex items-center space-x-1.5 px-3 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-[11px] sm:text-xs font-semibold">
+              <CheckSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               <span>EXPEDITION PREPARATION</span>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-heading">
+            <h2 className="text-xl sm:text-4xl font-extrabold text-white font-heading">
               Interactive Gear & Packing Checklist
             </h2>
-            <p className="text-xs sm:text-base text-slate-400">
-              Tick off your essential gear before departing. Being well-equipped ensures comfort, safety, and an unforgettable mountain experience.
+            <p className="text-xs sm:text-base text-slate-400 line-clamp-2 sm:line-clamp-none">
+              Tick off your essential gear before departing to ensure safety, comfort, and summit readiness.
             </p>
           </div>
 
-          {/* Packing Progress Card */}
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md w-full sm:w-auto sm:min-w-[260px] space-y-2">
+          {/* Compact Packing Progress Card */}
+          <div className="p-3 sm:p-4 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md w-full sm:w-auto sm:min-w-[260px] space-y-1.5 sm:space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold">
-              <span className="text-slate-300">Packing Readiness</span>
-              <span className="text-orange-400 font-bold">{progressPercent}% Ready</span>
+              <span className="text-slate-300">Readiness</span>
+              <span className="text-orange-400 font-bold">{progressPercent}% Ready ({packedItemsCount}/{totalItemsCount})</span>
             </div>
             <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
               <div
@@ -157,41 +158,45 @@ export default function GearChecklistSection() {
                 style={{ width: `${progressPercent}%` }}
               ></div>
             </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-              <span>{packedItemsCount} of {totalItemsCount} packed</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400 pt-0.5">
+              <span>{packedItemsCount === totalItemsCount ? '🎉 Ready to Summit!' : `${totalItemsCount - packedItemsCount} items remaining`}</span>
               <button
                 onClick={resetChecklist}
-                className="text-slate-500 hover:text-slate-300 flex items-center space-x-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-200 flex items-center space-x-1 cursor-pointer font-medium"
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 <span>Reset</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Category Selector Tabs (Scrollable on mobile) */}
-        <div className="flex items-center space-x-2 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none mb-6">
+        {/* Category Selector Tabs (Compact swipeable pills) */}
+        <div className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto pb-2.5 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none mb-4 sm:mb-6">
           {gearChecklist.map((cat) => {
             const isSelected = activeCategory === cat.category;
+            const categoryPacked = cat.items.filter(i => !!checkedItems[`${cat.category}_${i.name}`]).length;
             return (
               <button
                 key={cat.category}
                 onClick={() => setActiveCategory(cat.category)}
-                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
+                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap shrink-0 flex items-center space-x-1.5 cursor-pointer ${
                   isSelected
-                    ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg shadow-orange-950/40'
+                    ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-950/40'
                     : 'bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-white'
                 }`}
               >
-                {cat.category} ({cat.items.length})
+                <span>{cat.category}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-black/30 text-orange-200' : 'bg-slate-800 text-slate-400'}`}>
+                  {categoryPacked}/{cat.items.length}
+                </span>
               </button>
             );
           })}
         </div>
 
-        {/* Active Checklist Items Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+        {/* Compact Checklist Items Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3.5">
           {currentCategoryData.items.map((item, idx) => {
             const key = `${activeCategory}_${item.name}`;
             const isChecked = !!checkedItems[key];
@@ -200,7 +205,7 @@ export default function GearChecklistSection() {
                 key={idx}
                 whileTap={{ scale: 0.99 }}
                 onClick={() => toggleItem(activeCategory, item.name)}
-                className={`p-3.5 sm:p-4 rounded-2xl border cursor-pointer transition-all duration-200 flex items-start space-x-3 ${
+                className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border cursor-pointer transition-all duration-200 flex items-start space-x-2.5 sm:space-x-3 ${
                   isChecked
                     ? 'bg-emerald-950/20 border-emerald-500/40 text-slate-200'
                     : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 text-slate-300'
@@ -208,27 +213,27 @@ export default function GearChecklistSection() {
               >
                 <div className="mt-0.5 shrink-0">
                   {isChecked ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
                   ) : (
-                    <Square className="w-5 h-5 text-slate-500 hover:text-slate-400" />
+                    <Square className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 hover:text-slate-400" />
                   )}
                 </div>
 
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className={`text-xs sm:text-sm font-semibold leading-snug ${isChecked ? 'line-through text-slate-400' : 'text-white'}`}>
+                <div className="space-y-0.5 sm:space-y-1 flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <p className={`text-xs sm:text-sm font-semibold leading-snug truncate ${isChecked ? 'line-through text-slate-400' : 'text-white'}`}>
                       {item.name}
                     </p>
                     {item.mandatory && (
-                      <span className="px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold bg-red-500/15 text-red-400 border border-red-500/30 shrink-0">
+                      <span className="px-1.5 py-0.2 rounded text-[8px] sm:text-[9px] font-bold bg-red-500/15 text-red-400 border border-red-500/30 shrink-0 uppercase tracking-wide">
                         Mandatory
                       </span>
                     )}
                   </div>
                   {item.tip && (
-                    <p className="text-[11px] text-slate-400 flex items-center space-x-1">
-                      <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" />
-                      <span className="leading-tight">{item.tip}</span>
+                    <p className="text-[10px] sm:text-[11px] text-slate-400 flex items-center space-x-1 truncate">
+                      <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-400 shrink-0" />
+                      <span className="truncate">{item.tip}</span>
                     </p>
                   )}
                 </div>
@@ -238,18 +243,18 @@ export default function GearChecklistSection() {
         </div>
 
         {/* Bottom Actions */}
-        <div className="mt-6 sm:mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-400 flex items-center space-x-1.5 text-center sm:text-left">
-            <Sparkles className="w-4 h-4 text-orange-400 shrink-0" />
+        <div className="mt-4 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[11px] sm:text-xs text-slate-400 flex items-center space-x-1.5 text-center sm:text-left">
+            <Sparkles className="w-3.5 h-3.5 text-orange-400 shrink-0" />
             <span>Need gear rental (tents/sleeping bags)? Add it during checkout!</span>
           </p>
 
           <button
             onClick={handlePrint}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-orange-500/50 text-slate-200 text-xs font-semibold flex items-center justify-center space-x-2 transition-all cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-orange-500/50 text-slate-200 text-xs font-semibold flex items-center justify-center space-x-2 transition-all cursor-pointer"
           >
-            <Printer className="w-4 h-4 text-orange-400" />
-            <span>Print / Save Checklist PDF</span>
+            <Printer className="w-3.5 h-3.5 text-orange-400" />
+            <span>Print / Save PDF</span>
           </button>
         </div>
 
