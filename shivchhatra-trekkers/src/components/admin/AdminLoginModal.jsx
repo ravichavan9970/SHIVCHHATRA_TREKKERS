@@ -8,7 +8,10 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (pin.trim() === 'Shivchhatra#!*&+$Sahyadri!****2026') {
+    if (
+      pin.trim() === 'ShivPasss!****2026' || 
+      pin.trim() === 'Shivchhatra#!*&+$Sahyadri!****2026'
+    ) {
       onLoginSuccess();
       setPin('');
       setError(false);

@@ -17,7 +17,8 @@ import {
   Landmark,
   Server,
   Database,
-  RefreshCw
+  RefreshCw,
+  ChevronDown
 } from 'lucide-react';
 import AdminLoginGate from './components/admin/AdminLoginGate';
 import TrekManager from './components/admin/TrekManager';
@@ -38,7 +39,7 @@ export default function App() {
   // Always lock by default unless explicitly authenticated via the Master Passcode
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const token = getAdminToken();
-    return !!token && token === 'Shivchhatra#!*&+$Sahyadri!****2026';
+    return !!token && (token === 'ShivPasss!****2026' || token === 'Shivchhatra#!*&+$Sahyadri!****2026');
   });
 
   const [activeTab, setActiveTab] = useState('treks'); // 'treks' | 'bookings' | 'reviews' | 'payment'
@@ -110,13 +111,13 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-slate-100 p-4 sm:p-6 lg:p-8 space-y-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[#080c14] text-slate-100 p-3 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
+      <div className="max-w-7xl mx-auto space-y-5 sm:space-y-6">
         
         {/* Top Control Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-2xl">
-          <div className="flex items-center space-x-3.5">
-            <div className="w-14 h-14 rounded-full overflow-hidden p-0.5 bg-gradient-to-tr from-orange-600 to-amber-500 shadow-lg shadow-orange-600/30 shrink-0 flex items-center justify-center">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-3xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-2xl">
+          <div className="flex items-center space-x-3 sm:space-x-3.5">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden p-0.5 bg-gradient-to-tr from-orange-600 to-amber-500 shadow-lg shadow-orange-600/30 shrink-0 flex items-center justify-center">
               <img
                 src="/logo.jpg"
                 alt="Shivchhatra Logo"
@@ -125,23 +126,23 @@ export default function App() {
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="text-xl sm:text-2xl font-extrabold text-white font-heading">
+                <h1 className="text-lg sm:text-2xl font-extrabold text-white font-heading">
                   Shivchhatra Operations Hub
                 </h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-extrabold tracking-wider uppercase">
+                <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-extrabold tracking-wider uppercase">
                   Production Master
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
                 Sahyadri Fort Expeditions Enterprise Command Center
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center justify-end space-x-2 sm:space-x-3">
             <button
               onClick={loadMetrics}
-              className="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
+              className="p-2 sm:p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
               title="Refresh Global Metrics"
             >
               <RefreshCw className="w-4 h-4" />
@@ -149,66 +150,87 @@ export default function App() {
 
             <button
               onClick={handleLogout}
-              className="px-4 py-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-300 text-xs font-bold flex items-center space-x-2 transition-colors cursor-pointer"
+              className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-300 text-xs font-bold flex items-center space-x-1.5 sm:space-x-2 transition-colors cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Lock Terminal</span>
             </button>
           </div>
         </div>
 
         {/* Global Key Business Metrics Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl space-y-1">
-            <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl space-y-1">
+            <div className="flex items-center justify-between text-slate-400 text-[11px] sm:text-xs font-bold">
               <span>Verified Revenue</span>
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
             </div>
-            <p className="text-2xl sm:text-3xl font-extrabold text-white font-heading">
+            <p className="text-xl sm:text-3xl font-extrabold text-white font-heading">
               ₹{metrics.totalRevenue.toLocaleString('en-IN')}
             </p>
-            <p className="text-[11px] text-emerald-400 font-semibold flex items-center space-x-1">
+            <p className="text-[10px] sm:text-[11px] text-emerald-400 font-semibold flex items-center space-x-1">
               <CheckCircle2 className="w-3 h-3" />
               <span>Direct Bank Settlement</span>
             </p>
           </div>
 
-          <div className="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl space-y-1">
-            <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
-              <span>Registered Trekkers</span>
-              <Users className="w-4 h-4 text-blue-400" />
+          <div className="p-3.5 sm:p-5 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl space-y-1">
+            <div className="flex items-center justify-between text-slate-400 text-[11px] sm:text-xs font-bold">
+              <span>Trekkers</span>
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400" />
             </div>
-            <p className="text-2xl sm:text-3xl font-extrabold text-white font-heading">
+            <p className="text-xl sm:text-3xl font-extrabold text-white font-heading">
               {metrics.totalTrekkers}
             </p>
-            <p className="text-[11px] text-slate-400">Total participants</p>
+            <p className="text-[10px] sm:text-[11px] text-slate-400">Total participants</p>
           </div>
 
-          <div className="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl space-y-1">
-            <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
-              <span>Pending UTR Audits</span>
-              <AlertCircle className={`w-4 h-4 ${metrics.pendingCount > 0 ? 'text-amber-400 animate-bounce' : 'text-slate-500'}`} />
+          <div className="p-3.5 sm:p-5 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl space-y-1">
+            <div className="flex items-center justify-between text-slate-400 text-[11px] sm:text-xs font-bold">
+              <span>Pending UTRs</span>
+              <AlertCircle className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${metrics.pendingCount > 0 ? 'text-amber-400 animate-bounce' : 'text-slate-500'}`} />
             </div>
-            <p className={`text-2xl sm:text-3xl font-extrabold font-heading ${metrics.pendingCount > 0 ? 'text-amber-400' : 'text-white'}`}>
+            <p className={`text-xl sm:text-3xl font-extrabold font-heading ${metrics.pendingCount > 0 ? 'text-amber-400' : 'text-white'}`}>
               {metrics.pendingCount}
             </p>
-            <p className="text-[11px] text-slate-400">Awaiting bank verification</p>
+            <p className="text-[10px] sm:text-[11px] text-slate-400">Awaiting verification</p>
           </div>
 
-          <div className="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl space-y-1">
-            <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
-              <span>Active Trek Expeditions</span>
-              <Mountain className="w-4 h-4 text-orange-400" />
+          <div className="p-3.5 sm:p-5 rounded-3xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-xl space-y-1">
+            <div className="flex items-center justify-between text-slate-400 text-[11px] sm:text-xs font-bold">
+              <span>Active Treks</span>
+              <Mountain className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-400" />
             </div>
-            <p className="text-2xl sm:text-3xl font-extrabold text-white font-heading">
+            <p className="text-xl sm:text-3xl font-extrabold text-white font-heading">
               {metrics.activeTreksCount}
             </p>
-            <p className="text-[11px] text-slate-400">Published in database</p>
+            <p className="text-[10px] sm:text-[11px] text-slate-400">In live database</p>
           </div>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex items-center space-x-2 overflow-x-auto pb-2 border-b border-slate-800 scrollbar-none">
+        {/* Mobile Management View Dropdown Selector (Active on mobile screens) */}
+        <div className="sm:hidden space-y-1.5">
+          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+            Navigation Module:
+          </label>
+          <div className="relative">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full px-4 py-3.5 bg-slate-900 border-2 border-orange-500/60 rounded-2xl text-xs font-bold text-white focus:outline-none focus:border-orange-500 shadow-xl appearance-none pr-10 cursor-pointer"
+            >
+              {tabs.map((tab) => (
+                <option key={tab.id} value={tab.id} className="bg-slate-950 text-white font-semibold py-2">
+                  {tab.label} {tab.count !== null && tab.count !== undefined ? `(${tab.count})` : ''}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-5 h-5 text-orange-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Desktop Tab Switcher (Visible on tablets and laptops) */}
+        <div className="hidden sm:flex items-center space-x-2 overflow-x-auto pb-2 border-b border-slate-800 scrollbar-none">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isSelected = activeTab === tab.id;

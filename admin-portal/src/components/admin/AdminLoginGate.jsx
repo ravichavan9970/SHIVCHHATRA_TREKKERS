@@ -49,7 +49,11 @@ export default function AdminLoginGate({ onLoginSuccess }) {
     setError('');
 
     // Strict Master Key Check
-    if (cleanPass === 'Shivchhatra#!*&+$Sahyadri!****2026' || cleanPass === 'Shivchhatra#9970$Sahyadri!2026') {
+    if (
+      cleanPass === 'ShivPasss!****2026' || 
+      cleanPass === 'Shivchhatra#!*&+$Sahyadri!****2026' || 
+      cleanPass === 'Shivchhatra#9970$Sahyadri!2026'
+    ) {
       try {
         await loginAdmin(cleanPass).catch((err) => {
           console.warn('Backend login endpoint sync notice:', err);
