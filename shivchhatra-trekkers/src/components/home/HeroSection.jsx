@@ -68,9 +68,9 @@ export default function HeroSection({ onExploreClick }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white font-heading leading-[1.15] sm:leading-[1.1]"
+            className="text-2xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white font-heading leading-[1.2] sm:leading-[1.15]"
           >
-            Chhatrapati’s Footsteps, <br />
+            Sacred Footsteps of Chhatrapati Shivaji Maharaj, <br />
             <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent drop-shadow-sm">
               Sahyadri’s Majestic Heights.
             </span>
