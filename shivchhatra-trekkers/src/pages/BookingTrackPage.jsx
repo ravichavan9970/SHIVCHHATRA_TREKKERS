@@ -12,13 +12,15 @@ import {
   Phone, 
   MapPin, 
   Calendar, 
-  Sparkles
+  Sparkles,
+  ShieldAlert,
+  Trash2
 } from 'lucide-react';
 import { useBookings } from '../context/BookingContext';
 import { trackLiveBooking } from '../services/apiService';
 
 export default function BookingTrackPage() {
-  const { findBooking } = useBookings();
+  const { findBooking, deleteBooking } = useBookings();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchedBooking, setSearchedBooking] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
@@ -26,32 +28,43 @@ export default function BookingTrackPage() {
 
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
-    if (!searchQuery.trim()) return;
+    const cleanQuery = searchQuery.trim();
+    if (!cleanQuery) return;
     
     setIsSearching(true);
     let found = null;
     try {
-      // Always query live server database first to get current verified status
-      found = await trackLiveBooking(searchQuery.trim());
+      // Query live server database first to get real-time verified status
+      found = await trackLiveBooking(cleanQuery);
+      if (!found) {
+        // When server has purged/deleted this record (e.g. Trip Done), clear from phone local storage too!
+        deleteBooking(cleanQuery);
+        setSearchedBooking(null);
+      } else {
+        setSearchedBooking(found);
+      }
     } catch (err) {
-      console.warn('Live server query failed, falling back to local:', err);
+      console.warn('Live server query failed:', err);
+      // Only fallback to local if server is genuinely unreachable (offline)
+      found = findBooking(cleanQuery);
+      setSearchedBooking(found);
     }
-    if (!found) {
-      found = findBooking(searchQuery);
-    }
-    setSearchedBooking(found);
     setHasSearched(true);
     setIsSearching(false);
   };
 
-  // Real-time polling: Automatically reflect status when Admin verifies/rejects in Admin Portal
+  // Real-time polling: Automatically reflect status when Admin verifies/rejects or purges in Admin Portal
   useEffect(() => {
     if (!searchedBooking || !searchedBooking.id) return;
 
     const interval = setInterval(async () => {
       try {
         const fresh = await trackLiveBooking(searchedBooking.id);
-        if (fresh && JSON.stringify(fresh) !== JSON.stringify(searchedBooking)) {
+        if (!fresh) {
+          // If deleted on server (Trip Done), immediately purge from local view
+          deleteBooking(searchedBooking.id);
+          setSearchedBooking(null);
+        } else if (JSON.stringify(fresh) !== JSON.stringify(searchedBooking)) {
           setSearchedBooking(fresh);
         }
       } catch (e) {
@@ -102,56 +115,58 @@ export default function BookingTrackPage() {
             <div class="pass">
               <div class="header">
                 <div>
-                  <div class="brand">SHIVCHHATRA TREKKERS (शिवछत्र)</div>
-                  <div class="sub">Official Expedition Boarding Pass</div>
-                  <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Trek: <strong>${booking.trekTitle}</strong></div>
+                  <div class="brand">SHIVCHHATRA TREKKERS (शिवछत्र ट्रेकर्स)</div>
+                  <div class="sub">Official Sahyadri Expedition Boarding Pass</div>
                 </div>
-                <div class="ref">
-                  <div style="font-size: 10px; color: #64748b;">Pass Reference</div>
-                  <div>${booking.id}</div>
-                  <div style="font-size: 10px; color: #16a34a; margin-top: 2px;">● Status: ${booking.status}</div>
+                <div>
+                  <div class="ref">${booking.id}</div>
+                  <div style="font-size: 10px; color: #64748b; text-align: right;">Verified Booking</div>
                 </div>
               </div>
 
               <div class="grid">
                 <div>
-                  <div class="label">Lead Trekker</div>
+                  <div class="label">Expedition</div>
+                  <div class="val">${booking.trekTitle}</div>
+                </div>
+                <div>
+                  <div class="label">Primary Trekker</div>
                   <div class="val">${booking.primaryName}</div>
                 </div>
                 <div>
-                  <div class="label">Mobile / WhatsApp</div>
+                  <div class="label">Contact Mobile</div>
                   <div class="val">${booking.phone}</div>
                 </div>
                 <div>
                   <div class="label">Departure Batch</div>
-                  <div class="val" style="color: #ea580c;">${booking.batchDate}</div>
+                  <div class="val">${booking.batchDate}</div>
                 </div>
                 <div>
-                  <div class="label">Pickup Point</div>
+                  <div class="label">Pickup Location</div>
                   <div class="val">${booking.pickupCity} (${booking.pickupSpot})</div>
                 </div>
                 <div>
-                  <div class="label">Total Paid</div>
-                  <div class="val" style="color: #16a34a;">₹${booking.amountPaid}</div>
-                </div>
-                <div>
-                  <div class="label">Bank Reference (UTR)</div>
-                  <div class="val" style="font-family: monospace; font-size: 11px;">${booking.utrNumber || 'Verified'}</div>
+                  <div class="label">Amount Paid</div>
+                  <div class="val">₹${booking.amountPaid}</div>
                 </div>
               </div>
 
               <div class="squad">
-                <div class="label">Registered Squad (${booking.participantsCount} Trekkers):</div>
+                <div class="label">Participants Roster (${booking.participantsCount})</div>
                 <div class="pills">
-                  ${booking.participants ? booking.participants.map((p, idx) => `
-                    <div class="pill">${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})</div>
-                  `).join('') : `<div class="pill">${booking.primaryName}</div>`}
+                  ${booking.participants?.map((p, idx) => `
+                    <span class="pill">${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})</span>
+                  `).join('')}
                 </div>
               </div>
 
               <div class="footer">
-                <div>24/7 Helpline: <strong>+91 79727 33094</strong></div>
-                <div>Jai Shivray! Show this pass at boarding pickup spot.</div>
+                <div>
+                  <strong>Status:</strong> ${booking.status} • <strong>UTR:</strong> ${booking.utrNumber || 'N/A'}
+                </div>
+                <div>
+                  🚩 Carry a valid Government Photo ID on trek day.
+                </div>
               </div>
             </div>
 
@@ -159,14 +174,12 @@ export default function BookingTrackPage() {
               window.onload = function() {
                 window.focus();
                 window.print();
-                window.onafterprint = function() { window.close(); };
               };
             </script>
           </body>
         </html>
       `;
 
-      printWindow.document.open();
       printWindow.document.write(htmlContent);
       printWindow.document.close();
     } catch (e) {
@@ -175,80 +188,77 @@ export default function BookingTrackPage() {
   };
 
   const getStatusDisplay = (status) => {
-    if (status === 'Confirmed') {
-      return {
-        badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
-        text: 'Payment Verified & Confirmed',
-        desc: 'Your seat is locked! Trek leaders will add you to the batch WhatsApp group 24 hours prior to departure.'
-      };
+    switch (status) {
+      case 'Confirmed':
+        return {
+          badge: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+          text: 'Expedition Seat Confirmed & Verified',
+          desc: 'Your payment UTR is verified by Shivchhatra leadership. Your expedition boarding pass is active.'
+        };
+      case 'Rejected':
+        return {
+          badge: 'bg-red-500/10 border-red-500/30 text-red-400',
+          text: 'Payment UTR Verification Failed',
+          desc: 'Your transaction reference could not be matched with bank records. Please contact support on WhatsApp.'
+        };
+      default:
+        return {
+          badge: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
+          text: 'Under Automated UTR Verification',
+          desc: 'Your 12-digit transaction ID is being validated against bank records. Usually verified within 15–30 minutes.'
+        };
     }
-    if (status === 'Pending Verification') {
-      return {
-        badge: 'bg-amber-500/20 text-amber-400 border-amber-500/40 animate-pulse',
-        text: 'Under Automated UTR Verification',
-        desc: 'Your 12-digit transaction ID is being validated against bank records. Usually verified within 15-30 minutes.'
-      };
-    }
-    return {
-      badge: 'bg-red-500/20 text-red-400 border-red-500/40',
-      text: 'Verification Failed / Flagged',
-      desc: 'Unable to match bank UTR. Please contact our 24/7 helpline at +91 79727 33094 with your payment screenshot.'
-    };
   };
 
   return (
     <div className="min-h-screen bg-[#080c14] pt-24 pb-20">
       
       {/* Top Banner */}
-      <div className="relative py-14 bg-slate-950 border-b border-slate-800/80 overflow-hidden">
+      <div className="relative py-12 sm:py-16 bg-slate-950 border-b border-slate-800/80 overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-3">
-          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-semibold">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-semibold">
             <TicketCheck className="w-3.5 h-3.5" />
-            <span>INSTANT EXPEDITION PASS VERIFIER</span>
+            <span>EXPEDITION DISPATCH TRACKER</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-white font-heading">
-            Track Booking & Boarding Pass
+            Track Booking & Download Pass
           </h1>
-          <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
-            Check your payment verification status, retrieve your boarding pass, and view pickup coordinates.
+          <p className="text-xs sm:text-base text-slate-400 max-w-2xl mx-auto">
+            Input your Booking Reference ID (e.g. ST-2026-XXXX), Phone Number, or 12-Digit UTR to verify status and retrieve your boarding pass.
           </p>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-8">
         
-        {/* Search Input Card */}
-        <form onSubmit={handleSearch} className="p-4 sm:p-5 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl backdrop-blur-md space-y-3">
-          <label className="text-xs font-bold text-white uppercase tracking-wider block">
-            Enter Booking Reference ID, Phone Number, or 12-Digit UTR
-          </label>
-          
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        {/* Search Bar Widget */}
+        <form onSubmit={handleSearch} className="space-y-3">
+          <div className="p-2 sm:p-2.5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl backdrop-blur-xl flex flex-col sm:flex-row items-center gap-2">
+            <div className="relative flex-1 w-full">
+              <Search className="w-4 h-4 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                required
-                placeholder="e.g. ST-2026-8941 or 9876543210 or 423456789012"
+                placeholder="Enter Booking ID (ST-2026-...), 10-Digit Phone, or 12-Digit UTR..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 font-mono"
+                className="w-full pl-11 pr-4 py-3 bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none"
               />
             </div>
 
             <button
               type="submit"
-              className="px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-2 transition-all"
+              disabled={isSearching}
+              className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-lg shadow-orange-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
             >
-              <span>Track Pass</span>
+              <span>{isSearching ? 'Searching...' : 'Track Pass'}</span>
             </button>
           </div>
 
-          <p className="text-[11px] text-slate-500">
-            Try sample reference: <button type="button" onClick={() => { setSearchQuery('ST-2026-8941'); }} className="text-orange-400 hover:underline">ST-2026-8941</button> or <button type="button" onClick={() => { setSearchQuery('ST-2026-7215'); }} className="text-orange-400 hover:underline">ST-2026-7215</button>
+          <p className="text-[11px] text-slate-500 text-center">
+            Real-time synchronization with active live server database.
           </p>
         </form>
 
@@ -349,7 +359,7 @@ export default function BookingTrackPage() {
                   href={`https://wa.me/917972733094?text=${encodeURIComponent(`Jai Shivray! My booking ID is ${searchedBooking.id} for trek ${searchedBooking.trekTitle}. Please share batch updates.`)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center space-x-2 shadow-md shadow-emerald-600/30 transition-all"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center space-x-2 shadow-md shadow-emerald-600/30 transition-all cursor-pointer"
                 >
                   <Share2 className="w-4 h-4" />
                   <span>WhatsApp Expedition Lead</span>
@@ -362,14 +372,17 @@ export default function BookingTrackPage() {
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-8 rounded-3xl bg-slate-900/40 border border-slate-800 text-center space-y-3"
+              className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 text-center space-y-3 shadow-xl"
             >
-              <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto text-xl">
-                ⚠️
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl">
+                🚩
               </div>
-              <h4 className="text-base font-bold text-white">No Booking Found</h4>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                We could not find any booking matching "{searchQuery}". Please check your booking reference code (e.g. ST-2026-XXXX) or registered phone number.
+              <h4 className="text-base font-bold text-white">No Active Booking Found</h4>
+              <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                We could not find any active booking matching <span className="text-orange-400 font-bold">"{searchQuery}"</span>.
+              </p>
+              <p className="text-[11px] text-slate-500 max-w-md mx-auto italic">
+                ℹ️ If this trek was completed, all personal participant details and payment records have been securely purged from the servers for privacy.
               </p>
             </motion.div>
           )}

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { submitLiveBooking, trackLiveBooking } from '../services/apiService';
 
-const STORAGE_KEY = 'shivchhatra_bookings_v2';
+const STORAGE_KEY = 'shivchhatra_bookings_v3';
 
 const initialDemoBookings = [];
 
@@ -11,6 +11,7 @@ export function BookingProvider({ children }) {
   const [bookings, setBookings] = useState(() => {
     try {
       localStorage.removeItem('shivchhatra_bookings_data_v1');
+      localStorage.removeItem('shivchhatra_bookings_v2');
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? JSON.parse(saved) : initialDemoBookings;
     } catch (e) {
@@ -105,16 +106,28 @@ export function BookingProvider({ children }) {
     }));
   };
 
-  const deleteBooking = (bookingId) => {
-    setBookings(prev => prev.filter(b => b.id !== bookingId));
+  const deleteBooking = (queryOrId) => {
+    if (!queryOrId) return;
+    const q = queryOrId.trim().toUpperCase();
+    setBookings(prev => {
+      const updated = prev.filter(b => 
+        b.id.toUpperCase() !== q && 
+        !b.phone?.includes(q) && 
+        (!b.utrNumber || b.utrNumber.toUpperCase() !== q)
+      );
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const findBooking = (query) => {
     if (!query) return null;
     const q = query.trim().toUpperCase();
     return bookings.find(b => 
-      b.id.toUpperCase() === q || 
-      b.phone.includes(q) || 
+      b.id?.toUpperCase() === q || 
+      b.phone?.includes(q) || 
       (b.utrNumber && b.utrNumber.toUpperCase() === q)
     );
   };
