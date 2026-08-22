@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   HelpCircle, 
   ChevronDown, 
-  Sparkles,
-  PhoneCall,
-  MessageCircle
+  Sparkles, 
+  PhoneCall, 
+  MessageCircle,
+  HelpCircle as QuestionIcon
 } from 'lucide-react';
 import { faqs } from '../../data/safetyRules';
 
@@ -17,7 +18,7 @@ export default function FAQSection() {
   };
 
   return (
-    <section className="py-14 sm:py-20 bg-[#080c14] relative overflow-hidden border-t border-slate-800/80">
+    <section className="py-12 sm:py-20 bg-[#080c14] relative overflow-hidden border-t border-slate-800/80">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
@@ -30,7 +31,7 @@ export default function FAQSection() {
             Everything You Need to Know
           </h2>
           <p className="text-xs sm:text-base text-slate-400">
-            Got questions regarding trial difficulty, food, pickup timings, or safety? We have answers.
+            Got questions regarding trail difficulty, food, pickup timings, or safety? We have answers.
           </p>
         </div>
 
@@ -38,24 +39,28 @@ export default function FAQSection() {
         <div className="space-y-3">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
+            const questionText = faq.question || faq.q || "Common Question";
+            const answerText = faq.answer || faq.a || "Answer provided upon inquiry.";
             return (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: index * 0.05 }}
-                className="rounded-2xl border border-slate-800/80 bg-slate-900/60 overflow-hidden transition-all"
+                transition={{ duration: 0.2, delay: index * 0.04 }}
+                className={`rounded-2xl border transition-all overflow-hidden ${
+                  isOpen ? 'border-orange-500/40 bg-slate-900/90 shadow-lg' : 'border-slate-800/80 bg-slate-900/60 hover:border-slate-700'
+                }`}
               >
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 hover:bg-slate-850/50 transition-colors cursor-pointer"
+                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 transition-colors cursor-pointer"
                 >
-                  <span className="text-xs sm:text-sm font-bold text-white font-heading">
-                    {faq.question}
+                  <span className={`text-xs sm:text-sm font-bold font-heading leading-snug ${isOpen ? 'text-orange-400' : 'text-white'}`}>
+                    {questionText}
                   </span>
                   <ChevronDown
                     className={`w-4 h-4 text-orange-400 transition-transform duration-200 shrink-0 ${
-                      isOpen ? 'rotate-180' : ''
+                      isOpen ? 'rotate-180 text-orange-400' : 'text-slate-500'
                     }`}
                   />
                 </button>
@@ -67,9 +72,9 @@ export default function FAQSection() {
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="px-4 pb-4 sm:px-5 sm:pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-slate-800/40 pt-3"
+                      className="px-4 pb-4 sm:px-5 sm:pb-5 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3.5"
                     >
-                      {faq.answer}
+                      {answerText}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -78,7 +83,7 @@ export default function FAQSection() {
           })}
         </div>
 
-        {/* Custom Inquiry Card (No raw phone number text displayed) */}
+        {/* Custom Inquiry Card */}
         <div className="mt-8 sm:mt-10 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-orange-950/40 to-slate-900 border border-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div>
             <h4 className="text-xs sm:text-sm font-bold text-white font-heading">Have a custom question or group inquiry?</h4>
