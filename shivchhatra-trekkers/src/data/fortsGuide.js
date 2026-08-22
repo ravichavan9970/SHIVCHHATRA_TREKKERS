@@ -8,7 +8,7 @@ export const fortsGuide = [
     difficulty: "Moderate to Hard",
     baseVillage: "Gunjavane / Pali (Pune)",
     bestSeason: "July to February (Monsoon & Winter)",
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
+    image: "https://upload.wikimedia.org/wikipedia/commons/4/49/Suvela_machi%2CRajgad_fort%2C_Maharashtra%2CIndia_July2015.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original",
     keyStructures: [
       "Padmavati Machi & Temple",
       "Sanjeevani Machi (Double-layered Bastion Ridge)",
@@ -26,7 +26,7 @@ export const fortsGuide = [
     difficulty: "Easy to Moderate (Steps & Cable Car)",
     baseVillage: "Pachad (Mahad, Raigad)",
     bestSeason: "All Year Round (Special in Monsoon & Winter)",
-    image: "https://images.unsplash.com/photo-1609137144813-7d9921338f24?auto=format&fit=crop&w=1000&q=80",
+    image: "https://media.assettype.com/deccanherald%2F2024-07%2Ff8303050-1a25-4fad-ad30-a3788ff1b8be%2FPTI06_02_2023_000198B.jpg?rect=0%2C0%2C4800%2C2700&w=undefined&auto=format%2Ccompress&fit=max",
     keyStructures: [
       "Rajsabha (Royal Court with Acoustic Marvel)",
       "Shivaji Maharaj Samadhi & Jagdishwar Temple",
@@ -44,7 +44,7 @@ export const fortsGuide = [
     difficulty: "Hard & Steep",
     baseVillage: "Velhe (Pune)",
     bestSeason: "August to January",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4EPyREDrqJTstd5Bbh6n3J_vKSxVXAstb6gTEk4s13w&s=10",
     keyStructures: [
       "Zunjar Machi (Razor-edge cliff ridge)",
       "Budhla Machi (Massive rock bastion)",
@@ -62,7 +62,7 @@ export const fortsGuide = [
     difficulty: "Moderate to Challenging",
     baseVillage: "Khireshwar / Pachnai (Ahmednagar)",
     bestSeason: "September to March",
-    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80",
+    image: "https://pbs.twimg.com/media/FjbW9oKVIAEBwg1.jpg",
     keyStructures: [
       "Konkan Kada (1,800ft Concave Cliff)",
       "Kedareshwar Cave & 4 Pillars of Yugas",
@@ -80,7 +80,7 @@ export const fortsGuide = [
     difficulty: "Easy to Moderate",
     baseVillage: "Atkarwadi / Donje (Pune)",
     bestSeason: "Monsoon & Winter",
-    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1000&q=80",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUwpZ27Mbq-g5D6A605oEjPmXDlvuwOuyiYnmRbX6V4YzwBCJAPF9NTm0&s=10",
     keyStructures: [
       "Tanaji Malusare Samadhi & Memorial",
       "Kalyan Darwaja & Pune Darwaja",
@@ -98,7 +98,7 @@ export const fortsGuide = [
     difficulty: "Thrilling & Steep",
     baseVillage: "Harshewadi / Nirgudpada (Nashik)",
     bestSeason: "October to February",
-    image: "https://images.unsplash.com/photo-1527668752968-14dc70a27c95?auto=format&fit=crop&w=1000&q=80",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXxFh3tmnWMYk3NQASn0lk0rMta4yOak_Qlz3G6IotANzwj5AaL0Fitb0P&s=10",
     keyStructures: [
       "Vertical Rock-cut Steps with finger grips",
       "Mahadarwaja sculpted inside cave rock",
@@ -116,7 +116,7 @@ export const fortsGuide = [
     difficulty: "Easy to Moderate",
     baseVillage: "Kumbhroshi / Mahabaleshwar (Satara)",
     bestSeason: "July to February",
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
+    image: "https://www.yes.edu.in/images/attractions/Pratapgad-Fort.jpg",
     keyStructures: [
       "Bhavani Mata Mandir (Consecrated by Shivaji Maharaj)",
       "Afzal Khan Tomb & Memorial",
@@ -134,7 +134,7 @@ export const fortsGuide = [
     difficulty: "Easy to Moderate",
     baseVillage: "Panhala Town (Kolhapur)",
     bestSeason: "Year Round (Monsoon to Winter)",
-    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80",
+    image: "https://www.mtdc.co.in/wp-content/uploads/2020/01/panhala-fort-kolhapur.jpg",
     keyStructures: [
       "Sajja Kothi & Teen Darwaza",
       "Ambarkhana Granaries (Ganga, Yamuna, Saraswati)",
@@ -152,7 +152,7 @@ export const fortsGuide = [
     difficulty: "Moderate to Challenging",
     baseVillage: "Waghamba / Salher Village (Baglan, Nashik)",
     bestSeason: "October to March",
-    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1000&q=80",
+    image: "https://upload.wikimedia.org/wikipedia/commons/4/49/Suvela_machi%2CRajgad_fort%2C_Maharashtra%2CIndia_July2015.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original",
     keyStructures: [
       "Parshuram Temple & Cave Complexes",
       "Ganesh Darwaza & Massive Gateway Arches",
