@@ -1,15 +1,14 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 export function getAdminToken() {
-  return localStorage.getItem('shivchhatra_admin_token') || sessionStorage.getItem('shivchhatra_admin_token') || 'shivchhatra-sahyadri-secret-master-token-key-2026';
+  return sessionStorage.getItem('shivchhatra_admin_token') || localStorage.getItem('shivchhatra_admin_token') || null;
 }
 
-export function setAdminToken(token, remember = true) {
+export function setAdminToken(token, remember = false) {
   if (remember) {
     localStorage.setItem('shivchhatra_admin_token', token);
-  } else {
-    sessionStorage.setItem('shivchhatra_admin_token', token);
   }
+  sessionStorage.setItem('shivchhatra_admin_token', token);
 }
 
 export function clearAdminToken() {
@@ -72,7 +71,7 @@ export async function loginAdmin(passcode) {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.error || 'Login failed');
+    throw new Error(data.error || 'Access Denied: Invalid Master Passcode');
   }
 
   setAdminToken(data.token);
@@ -109,17 +108,17 @@ export async function fetchAdminBookings() {
   return fetchWithAuth('/admin/bookings');
 }
 
-export async function verifyAdminBooking(id, adminNote = 'Verified by Admin') {
+export async function verifyAdminBooking(id, note = 'Verified by Admin') {
   return fetchWithAuth(`/admin/bookings/${id}/verify`, {
     method: 'PUT',
-    body: JSON.stringify({ adminNote })
+    body: JSON.stringify({ note })
   });
 }
 
-export async function rejectAdminBooking(id, adminNote = 'Rejected by Admin') {
+export async function rejectAdminBooking(id, reason = 'Rejected by Admin') {
   return fetchWithAuth(`/admin/bookings/${id}/reject`, {
     method: 'PUT',
-    body: JSON.stringify({ adminNote })
+    body: JSON.stringify({ reason })
   });
 }
 
@@ -139,7 +138,7 @@ export async function fetchAdminReviewStats() {
 }
 
 export async function createAdminReview(review) {
-  return fetchWithAuth('/reviews', {
+  return fetchWithAuth('/admin/reviews', {
     method: 'POST',
     body: JSON.stringify(review)
   });

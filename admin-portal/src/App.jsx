@@ -35,7 +35,12 @@ import {
 } from './services/api';
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!getAdminToken());
+  // Always lock by default unless explicitly authenticated via the Master Passcode
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const token = getAdminToken();
+    return !!token && token === 'Shivchhatra#9970$Sahyadri!2026';
+  });
+
   const [activeTab, setActiveTab] = useState('treks'); // 'treks' | 'bookings' | 'reviews' | 'payment'
 
   const [metrics, setMetrics] = useState({
@@ -77,6 +82,14 @@ export default function App() {
       loadMetrics();
     }
   }, [isAuthenticated, activeTab]);
+
+  useEffect(() => {
+    const handleAuthFailed = () => {
+      setIsAuthenticated(false);
+    };
+    window.addEventListener('admin_auth_failed', handleAuthFailed);
+    return () => window.removeEventListener('admin_auth_failed', handleAuthFailed);
+  }, []);
 
   const handleLogout = () => {
     clearAdminToken();
@@ -126,15 +139,9 @@ export default function App() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
-              <Server className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-slate-300 font-medium">Java Spring Boot 3.3 (Port 8080)</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            </div>
-
             <button
               onClick={loadMetrics}
-              className="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 transition-colors"
+              className="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
               title="Refresh Global Metrics"
             >
               <RefreshCw className="w-4 h-4" />
