@@ -10,7 +10,8 @@ import {
   Lock,
   ArrowUpRight,
   Sparkles,
-  MessageCircle
+  MessageCircle,
+  UserCheck
 } from 'lucide-react';
 
 export default function Footer() {
@@ -106,7 +107,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Connect & Support Buttons (3 cols on desktop, 2x2 grid on mobile) */}
+          {/* Connect & Support Buttons (3 cols on desktop, compact grid on mobile) */}
           <div className="lg:col-span-3">
             <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider mb-2.5 sm:mb-4 font-heading">
               Connect With Us
@@ -120,7 +121,7 @@ export default function Footer() {
                 className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 hover:border-emerald-500 hover:bg-emerald-900/40 text-emerald-300 text-xs font-semibold transition-all group"
               >
                 <MessageCircle className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
-                <span className="truncate">WhatsApp</span>
+                <span className="truncate">WhatsApp Chat</span>
               </a>
 
               {/* Call Helpline Button */}
@@ -132,21 +133,37 @@ export default function Footer() {
                 <span className="truncate">Call Helpline</span>
               </a>
 
-              {/* Email Us Button */}
+              {/* Official Club Instagram Button */}
               <a
-                href="mailto:info@shivchhatra.in"
-                className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-orange-500/10 text-slate-200 text-xs font-semibold transition-all group"
+                href="https://www.instagram.com/shiv_chhatra_trekkers?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-pink-500/15 border border-orange-500/40 hover:border-orange-500 hover:from-orange-500/25 hover:to-pink-500/25 text-orange-300 text-xs font-semibold transition-all group shadow-sm"
+                title="Official Shivchhatra Trekkers Instagram"
               >
-                <Mail className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
-                <span className="truncate">Email Us</span>
+                <svg
+                  className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+                <span className="truncate">Club Instagram</span>
               </a>
 
-              {/* Instagram Button */}
+              {/* Founder / Owner Instagram Profile */}
               <a
                 href="https://www.instagram.com/roambeyond_?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-orange-500/10 border border-pink-500/30 hover:border-pink-500 hover:from-pink-500/20 hover:to-orange-500/20 text-pink-300 text-xs font-semibold transition-all group"
+                title="Founder & Lead Trekker Profile"
               >
                 <svg
                   className="w-3.5 h-3.5 text-pink-400 group-hover:scale-110 transition-transform shrink-0"
@@ -161,7 +178,16 @@ export default function Footer() {
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                   <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                 </svg>
-                <span className="truncate">Instagram</span>
+                <span className="truncate">Founder Profile</span>
+              </a>
+
+              {/* Email Us Button (full width on mobile if odd item) */}
+              <a
+                href="mailto:info@shivchhatra.in"
+                className="col-span-2 sm:col-span-2 lg:col-span-1 flex items-center justify-center lg:justify-start space-x-2 px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-orange-500/10 text-slate-200 text-xs font-semibold transition-all group"
+              >
+                <Mail className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+                <span className="truncate">info@shivchhatra.in</span>
               </a>
             </div>
           </div>
