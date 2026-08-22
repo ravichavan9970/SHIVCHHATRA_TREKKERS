@@ -41,22 +41,21 @@ export default function AdminLoginGate({ onLoginSuccess }) {
     e.preventDefault();
     const cleanPass = passcode.trim();
     if (!cleanPass) {
-      setError('Please enter your security passcode');
+      setError('Please enter your master security passcode');
       return;
     }
 
     setIsLoading(true);
     setError('');
 
-    // Strict Master Key Check
+    // Level 1: Master Dashboard Passcode
     if (
-      cleanPass === 'ShivPasss!****2026' || 
-      cleanPass === 'Shivchhatra#!*&+$Sahyadri!****2026' || 
-      cleanPass === 'Shivchhatra#9970$Sahyadri!2026'
+      cleanPass === 'Shivchhatra#!*&+$Sahyadri!****2026' ||
+      cleanPass === 'ShivPasss!****2026'
     ) {
       try {
         await loginAdmin(cleanPass).catch((err) => {
-          console.warn('Backend login endpoint sync notice:', err);
+          console.warn('Backend login endpoint notice:', err);
         });
       } catch (e) {
         // Fallback safely
@@ -67,7 +66,6 @@ export default function AdminLoginGate({ onLoginSuccess }) {
       return;
     }
 
-    // Attempt backend verification for any other custom token
     try {
       await loginAdmin(cleanPass);
       setIsLoading(false);
@@ -139,7 +137,7 @@ export default function AdminLoginGate({ onLoginSuccess }) {
                 setPasscode(e.target.value);
                 setError('');
               }}
-              placeholder="Enter master passcode"
+              placeholder="Enter master dashboard passcode"
               className="w-full px-4 py-3.5 bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-2xl text-white placeholder-slate-500 text-sm font-mono tracking-widest focus:outline-none transition-all"
               autoFocus
             />
