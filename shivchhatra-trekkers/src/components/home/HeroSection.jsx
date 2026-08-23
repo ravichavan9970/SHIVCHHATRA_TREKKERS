@@ -24,7 +24,7 @@ export default function HeroSection({ onExploreClick }) {
   const { stats, openReviewModal } = useReviews();
 
   const totalTrekkersCount = bookings
-    .filter(b => b.status !== 'Rejected')
+    .filter(b => b.status === 'Confirmed' || b.status === 'Completed')
     .reduce((sum, b) => sum + (Number(b.participantsCount) || 1), 0);
 
   const handleSearchSubmit = (e) => {

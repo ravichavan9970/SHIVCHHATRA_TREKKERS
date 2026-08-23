@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { submitLiveBooking, trackLiveBooking } from '../services/apiService';
 
-const STORAGE_KEY = 'shivchhatra_bookings_v3';
+const STORAGE_KEY = 'shivchhatra_bookings_v4';
 
 const initialDemoBookings = [];
 
@@ -12,6 +12,7 @@ export function BookingProvider({ children }) {
     try {
       localStorage.removeItem('shivchhatra_bookings_data_v1');
       localStorage.removeItem('shivchhatra_bookings_v2');
+      localStorage.removeItem('shivchhatra_bookings_v3');
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? JSON.parse(saved) : initialDemoBookings;
     } catch (e) {
