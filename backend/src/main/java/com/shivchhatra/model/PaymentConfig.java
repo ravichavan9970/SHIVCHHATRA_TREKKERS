@@ -9,6 +9,7 @@ public class PaymentConfig {
     @Id
     private String id; // default = "default"
 
+    // Option 1: Direct UPI & Merchant Standee
     private String merchantName;
     private String upiId;
     private String merchantPhone;
@@ -25,6 +26,13 @@ public class PaymentConfig {
 
     @Column(length = 2000)
     private String securityNotice;
+
+    // Option 2: Payment Gateway & Bank API Keys
+    private boolean enableGateway;
+    private String gatewayProvider; // "razorpay" | "cashfree" | "phonepe"
+    private String gatewayKeyId;
+    private String gatewayKeySecret;
+    private boolean gatewayTestMode;
 
     public PaymentConfig() {
     }
@@ -115,5 +123,45 @@ public class PaymentConfig {
 
     public void setSecurityNotice(String securityNotice) {
         this.securityNotice = securityNotice;
+    }
+
+    public boolean isEnableGateway() {
+        return enableGateway;
+    }
+
+    public void setEnableGateway(boolean enableGateway) {
+        this.enableGateway = enableGateway;
+    }
+
+    public String getGatewayProvider() {
+        return gatewayProvider;
+    }
+
+    public void setGatewayProvider(String gatewayProvider) {
+        this.gatewayProvider = gatewayProvider;
+    }
+
+    public String getGatewayKeyId() {
+        return gatewayKeyId;
+    }
+
+    public void setGatewayKeyId(String gatewayKeyId) {
+        this.gatewayKeyId = gatewayKeyId;
+    }
+
+    public String getGatewayKeySecret() {
+        return gatewayKeySecret;
+    }
+
+    public void setGatewayKeySecret(String gatewayKeySecret) {
+        this.gatewayKeySecret = gatewayKeySecret;
+    }
+
+    public boolean isGatewayTestMode() {
+        return gatewayTestMode;
+    }
+
+    public void setGatewayTestMode(boolean gatewayTestMode) {
+        this.gatewayTestMode = gatewayTestMode;
     }
 }

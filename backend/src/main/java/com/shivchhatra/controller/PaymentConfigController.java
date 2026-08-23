@@ -27,6 +27,8 @@ public class PaymentConfigController {
             d.setEnableCustomScanner(true);
             d.setEnableDynamicQR(true);
             d.setPermitFee(100);
+            d.setEnableGateway(false);
+            d.setGatewayProvider("razorpay");
             d.setSecurityNotice("Verified Official Sahyadri Adventure Portal. Scan through any UPI App (GPay, PhonePe, Paytm, BHIM, CRED).");
             return paymentConfigRepository.save(d);
         });
@@ -41,6 +43,7 @@ public class PaymentConfigController {
             return d;
         });
 
+        // Option 1
         if (updated.getMerchantName() != null) existing.setMerchantName(updated.getMerchantName());
         if (updated.getUpiId() != null) existing.setUpiId(updated.getUpiId());
         if (updated.getMerchantPhone() != null) existing.setMerchantPhone(updated.getMerchantPhone());
@@ -51,6 +54,13 @@ public class PaymentConfigController {
         existing.setEnableDynamicQR(updated.isEnableDynamicQR());
         if (updated.getPermitFee() > 0) existing.setPermitFee(updated.getPermitFee());
         if (updated.getSecurityNotice() != null) existing.setSecurityNotice(updated.getSecurityNotice());
+
+        // Option 2 (Gateway & Keys)
+        existing.setEnableGateway(updated.isEnableGateway());
+        if (updated.getGatewayProvider() != null) existing.setGatewayProvider(updated.getGatewayProvider());
+        if (updated.getGatewayKeyId() != null) existing.setGatewayKeyId(updated.getGatewayKeyId());
+        if (updated.getGatewayKeySecret() != null) existing.setGatewayKeySecret(updated.getGatewayKeySecret());
+        existing.setGatewayTestMode(updated.isGatewayTestMode());
 
         PaymentConfig saved = paymentConfigRepository.save(existing);
         return ResponseEntity.ok(saved);
