@@ -115,7 +115,7 @@ export default function BookingTrackPage() {
             <div class="pass">
               <div class="header">
                 <div>
-                  <div class="brand">SHIVCHHATRA TREKKERS (शिवछत्र ट्रेकर्स)</div>
+                  <div class="brand">SHIVCHHATRA TREKKERS</div>
                   <div class="sub">Official Sahyadri Expedition Boarding Pass</div>
                 </div>
                 <div>

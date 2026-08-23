@@ -466,7 +466,7 @@ export default function BookingModal() {
             <div class="pass">
               <div class="header">
                 <div>
-                  <div class="brand">SHIVCHHATRA TREKKERS (शिवछत्र)</div>
+                  <div class="brand">SHIVCHHATRA TREKKERS</div>
                   <div class="sub">Official Expedition Boarding Pass</div>
                   <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Trek: <strong>${booking.trekTitle}</strong></div>
                 </div>
