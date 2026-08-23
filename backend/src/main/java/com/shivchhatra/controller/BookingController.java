@@ -47,13 +47,21 @@ public class BookingController {
                 .filter(b -> "Completed".equalsIgnoreCase(b.getStatus()))
                 .mapToInt(b -> b.getParticipantsCount() > 0 ? b.getParticipantsCount() : 1)
                 .sum();
+        int confirmedTrekkers = all.stream()
+                .filter(b -> "Confirmed".equalsIgnoreCase(b.getStatus()))
+                .mapToInt(b -> b.getParticipantsCount() > 0 ? b.getParticipantsCount() : 1)
+                .sum();
+        int totalVerified = completedTrekkers + confirmedTrekkers;
         int totalExpeditions = (int) all.stream()
                 .filter(b -> "Completed".equalsIgnoreCase(b.getStatus()))
                 .count();
 
         Map<String, Object> stats = new HashMap<>();
-        stats.put("completedTrekkers", completedTrekkers);
+        stats.put("completedTrekkers", completedTrekkers > 0 ? completedTrekkers : totalVerified);
+        stats.put("verifiedTrekkers", totalVerified);
+        stats.put("confirmedTrekkers", confirmedTrekkers);
         stats.put("completedExpeditions", totalExpeditions);
+        stats.put("totalBookings", all.size());
         return stats;
     }
 

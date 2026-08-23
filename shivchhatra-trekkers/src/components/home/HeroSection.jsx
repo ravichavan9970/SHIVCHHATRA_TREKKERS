@@ -41,14 +41,13 @@ export default function HeroSection({ onExploreClick }) {
     };
   }, []);
 
-  // Strictly count completed trekkers from live server database + local completed bookings
+  // Count completed/verified trekkers from live server database + local completed bookings
   const localCompletedCount = bookings
-    .filter(b => b.status === 'Completed')
+    .filter(b => b.status === 'Completed' || b.status === 'Confirmed')
     .reduce((sum, b) => sum + (Number(b.participantsCount) || 1), 0);
 
-  const totalTrekkersCount = liveCompletedTrekkers !== null 
-    ? liveCompletedTrekkers 
-    : localCompletedCount;
+  const serverCount = (liveCompletedTrekkers !== null && liveCompletedTrekkers !== undefined) ? liveCompletedTrekkers : 0;
+  const totalTrekkersCount = Math.max(serverCount, localCompletedCount);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
