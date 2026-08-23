@@ -116,57 +116,55 @@ export default function BookingTrackPage() {
               <div class="header">
                 <div>
                   <div class="brand">SHIVCHHATRA TREKKERS</div>
-                  <div class="sub">Official Sahyadri Expedition Boarding Pass</div>
+                  <div class="sub">Official Expedition Boarding Pass</div>
+                  <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Trek: <strong>${booking.trekTitle}</strong></div>
                 </div>
-                <div>
-                  <div class="ref">${booking.id}</div>
-                  <div style="font-size: 10px; color: #64748b; text-align: right;">Verified Booking</div>
+                <div class="ref">
+                  <div style="font-size: 10px; color: #64748b;">Pass Reference</div>
+                  <div>${booking.id}</div>
+                  <div style="font-size: 10px; color: #16a34a; margin-top: 2px;">● Status: ${booking.status}</div>
                 </div>
               </div>
 
               <div class="grid">
                 <div>
-                  <div class="label">Expedition</div>
-                  <div class="val">${booking.trekTitle}</div>
-                </div>
-                <div>
-                  <div class="label">Primary Trekker</div>
+                  <div class="label">Lead Trekker</div>
                   <div class="val">${booking.primaryName}</div>
                 </div>
                 <div>
-                  <div class="label">Contact Mobile</div>
+                  <div class="label">Mobile / WhatsApp</div>
                   <div class="val">${booking.phone}</div>
                 </div>
                 <div>
                   <div class="label">Departure Batch</div>
-                  <div class="val">${booking.batchDate}</div>
+                  <div class="val" style="color: #ea580c;">${booking.batchDate}</div>
                 </div>
                 <div>
-                  <div class="label">Pickup Location</div>
-                  <div class="val">${booking.pickupCity} (${booking.pickupSpot})</div>
+                  <div class="label">Pickup Point</div>
+                  <div class="val">${booking.pickupCity} - ${booking.pickupSpot}</div>
                 </div>
                 <div>
-                  <div class="label">Amount Paid</div>
-                  <div class="val">₹${booking.amountPaid}</div>
+                  <div class="label">Total Paid</div>
+                  <div class="val" style="color: #16a34a;">₹${booking.amountPaid}</div>
+                </div>
+                <div>
+                  <div class="label">Bank Reference (UTR)</div>
+                  <div class="val" style="font-family: monospace; font-size: 11px;">${booking.utrNumber || 'Verified'}</div>
                 </div>
               </div>
 
               <div class="squad">
-                <div class="label">Participants Roster (${booking.participantsCount})</div>
+                <div class="label">Registered Squad (${booking.participantsCount} Trekkers):</div>
                 <div class="pills">
-                  ${booking.participants?.map((p, idx) => `
-                    <span class="pill">${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})</span>
-                  `).join('')}
+                  ${booking.participants ? booking.participants.map((p, idx) => `
+                    <div class="pill">${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})</div>
+                  `).join('') : `<div class="pill">${booking.primaryName}</div>`}
                 </div>
               </div>
 
               <div class="footer">
-                <div>
-                  <strong>Status:</strong> ${booking.status} • <strong>UTR:</strong> ${booking.utrNumber || 'N/A'}
-                </div>
-                <div>
-                  🚩 Carry a valid Government Photo ID on trek day.
-                </div>
+                <div>24/7 Helpline: <strong>+91 79727 33094</strong></div>
+                <div>Show this official pass at the boarding pickup point.</div>
               </div>
             </div>
 
