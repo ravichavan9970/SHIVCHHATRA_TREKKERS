@@ -38,22 +38,6 @@ const defaultPickUpLocations = [
       "Wakad - Ginger Hotel Flyover (12:15 AM)",
       "Katraj - Wonder City (11:45 PM)"
     ]
-  },
-  {
-    city: "Mumbai",
-    spots: [
-      "Dadar - Swami Narayan Temple (09:00 PM)",
-      "Thane - Teen Hath Naka (10:00 PM)",
-      "Vashi - Highway Main Flyover (10:45 PM)",
-      "Kalamboli - McDonald's Junction (11:15 PM)"
-    ]
-  },
-  {
-    city: "Nashik",
-    spots: [
-      "Dwarka Circle (11:00 PM)",
-      "CBS Bus Stand (11:30 PM)"
-    ]
   }
 ];
 
@@ -272,7 +256,7 @@ export default function BookingModal() {
   const upiUri = `upi://pay?pa=${encodeURIComponent(config.upiId)}&pn=${encodeURIComponent(config.merchantName)}&am=${finalTotalAmount}&cu=INR&tn=${encodeURIComponent(`Shivchhatra Trek Booking - ${bookingTempRef}`)}`;
 
   // Step 3 Payment Verification & Final Submit
-  const handleFinalPaymentSubmit = (e) => {
+  const handleFinalPaymentSubmit = async (e) => {
     e.preventDefault();
     setUtrError('');
 
@@ -299,8 +283,8 @@ export default function BookingModal() {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const newBooking = submitBooking({
+    try {
+      const newBooking = await submitBooking({
         trekId: activeTrekForBooking.id,
         trekTitle: activeTrekForBooking.title,
         batchDate: activeBatchForBooking?.date || "Upcoming Batch",
@@ -308,8 +292,8 @@ export default function BookingModal() {
         phone: phone.trim(),
         email: email.trim(),
         emergencyPhone: emergencyPhone.trim(),
-        pickupCity,
-        pickupSpot,
+        pickupCity: pickupCity || "Pune",
+        pickupSpot: pickupSpot || "Direct Contact / Base Village",
         participantsCount,
         participants,
         amountPaid: finalTotalAmount,
@@ -338,7 +322,11 @@ export default function BookingModal() {
       } catch (e) {
         console.error(e);
       }
-    }, 1200);
+    } catch (err) {
+      console.error(err);
+      setIsSubmitting(false);
+      setUtrError('Booking submission error: ' + err.message);
+    }
   };
 
   const handlePrintPass = (booking) => {

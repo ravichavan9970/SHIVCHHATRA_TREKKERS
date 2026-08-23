@@ -23,15 +23,8 @@ const defaultPickUpLocations = [
     spots: [
       "Swargate - Near Laxmi Narayan Theatre (11:00 PM)",
       "Shivajinagar - Bank of Maharashtra (11:30 PM)",
-      "Wakad - Ginger Hotel Flyover (12:15 AM)"
-    ]
-  },
-  {
-    city: "Mumbai",
-    spots: [
-      "Dadar - Swami Narayan Temple (09:00 PM)",
-      "Thane - Teen Hath Naka (10:00 PM)",
-      "Vashi - Main Highway Flyover (10:45 PM)"
+      "Wakad - Ginger Hotel Flyover (12:15 AM)",
+      "Katraj - Wonder City (11:45 PM)"
     ]
   }
 ];
