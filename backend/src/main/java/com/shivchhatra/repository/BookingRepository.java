@@ -18,6 +18,6 @@ public interface BookingRepository extends JpaRepository<Booking, String> {
 
     List<Booking> findAllByOrderBySubmittedAtDesc();
 
-    @Query("SELECT b FROM Booking b WHERE UPPER(b.id) = UPPER(:query) OR b.phone LIKE %:query% OR UPPER(b.utrNumber) = UPPER(:query)")
-    Optional<Booking> searchBooking(@Param("query") String query);
+    @Query("SELECT b FROM Booking b WHERE UPPER(b.id) = UPPER(:query) OR b.phone = :query OR b.phone LIKE %:query% OR UPPER(b.utrNumber) = UPPER(:query) ORDER BY b.submittedAt DESC")
+    List<Booking> searchBooking(@Param("query") String query);
 }

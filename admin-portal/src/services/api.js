@@ -127,14 +127,14 @@ export async function fetchAdminBookings() {
 export async function verifyAdminBooking(id, note = 'Verified by Admin') {
   return fetchWithAuth(`/admin/bookings/${id}/verify`, {
     method: 'PUT',
-    body: JSON.stringify({ note })
+    body: JSON.stringify({ adminNote: note, note: note })
   });
 }
 
 export async function rejectAdminBooking(id, reason = 'Rejected by Admin') {
   return fetchWithAuth(`/admin/bookings/${id}/reject`, {
     method: 'PUT',
-    body: JSON.stringify({ reason })
+    body: JSON.stringify({ adminNote: reason, reason: reason, note: reason })
   });
 }
 
@@ -169,21 +169,26 @@ export async function deleteAdminReview(id) {
 // Payment Config API
 export async function fetchAdminPaymentConfig() {
   try {
-    const data = await fetchWithAuth('/payment-config');
+    const data = await fetchWithAuth('/admin/payment-config');
     return data;
   } catch (err) {
-    const fallback = localStorage.getItem('shivchhatra_payment_config_v2');
-    return fallback ? JSON.parse(fallback) : {
-      merchantName: "Shivchhatra Trekkers (Ravindra Chavan)",
-      upiId: "7447661921@hdfc",
-      merchantPhone: "+91 74476 61921",
-      accountHolder: "RAVINDRA LAXMAN CHAVAN",
-      bankName: "HDFC Bank",
-      customScannerImage: "/payment_scanner.jpg",
-      enableCustomScanner: true,
-      enableDynamicQR: true,
-      permitFee: 100
-    };
+    try {
+      const pubData = await fetchWithAuth('/payment-config');
+      return pubData;
+    } catch {
+      const fallback = localStorage.getItem('shivchhatra_payment_config_v2');
+      return fallback ? JSON.parse(fallback) : {
+        merchantName: "Shivchhatra Trekkers (Ravindra Chavan)",
+        upiId: "7447661921@hdfc",
+        merchantPhone: "+91 74476 61921",
+        accountHolder: "RAVINDRA LAXMAN CHAVAN",
+        bankName: "HDFC Bank",
+        customScannerImage: "/payment_scanner.jpg",
+        enableCustomScanner: true,
+        enableDynamicQR: true,
+        permitFee: 100
+      };
+    }
   }
 }
 

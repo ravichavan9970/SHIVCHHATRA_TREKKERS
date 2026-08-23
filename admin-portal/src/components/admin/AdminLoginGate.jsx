@@ -23,7 +23,8 @@ export default function AdminLoginGate({ onLoginSuccess }) {
     // Check if backend server is active
     const checkServerStatus = async () => {
       try {
-        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+        const apiBase = import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:8080/api' : 'https://shivchhatra-trekkers-bjqg.onrender.com/api');
         const res = await fetch(`${apiBase}/treks`, { method: 'GET' });
         if (!res.ok && res.status >= 500) {
           setIsServerOffline(true);

@@ -55,7 +55,35 @@ public class ReviewController {
     }
 
     @PostMapping("/reviews")
-    public ResponseEntity<Review> submitReview(@RequestBody Review review) {
+    public ResponseEntity<?> submitReview(@RequestBody Review review) {
+        if (review.getUserName() == null || review.getUserName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Trekker name is required"));
+        }
+        if (review.getComment() == null || review.getComment().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Review feedback comment is required"));
+        }
+
+        // Clamp rating securely between 1 and 5
+        int rating = review.getRating();
+        if (rating < 1) rating = 1;
+        if (rating > 5) rating = 5;
+        review.setRating(rating);
+
+        // Sanitize string lengths
+        String name = review.getUserName().trim();
+        if (name.length() > 100) name = name.substring(0, 100);
+        review.setUserName(name);
+
+        String comment = review.getComment().trim();
+        if (comment.length() > 1000) comment = comment.substring(0, 1000);
+        review.setComment(comment);
+
+        if (review.getCity() != null) {
+            String city = review.getCity().trim();
+            if (city.length() > 80) city = city.substring(0, 80);
+            review.setCity(city);
+        }
+
         if (review.getId() == null || review.getId().isEmpty()) {
             review.setId("rev-" + System.currentTimeMillis());
         }

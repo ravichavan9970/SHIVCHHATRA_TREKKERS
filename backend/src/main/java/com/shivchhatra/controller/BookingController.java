@@ -33,15 +33,25 @@ public class BookingController {
         if (query == null || query.trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        return bookingRepository.searchBooking(query.trim())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        List<Booking> matches = bookingRepository.searchBooking(query.trim());
+        if (!matches.isEmpty()) {
+            return ResponseEntity.ok(matches.get(0));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/bookings")
     public ResponseEntity<?> submitBooking(@RequestBody Booking booking) {
         if (booking.getUtrNumber() == null || booking.getUtrNumber().trim().length() < 6) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Valid 12-digit UTR transaction number is required"));
+        }
+
+        // Input validation & sanitation
+        if (booking.getPrimaryName() == null || booking.getPrimaryName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Lead trekker name is required"));
+        }
+        if (booking.getPhone() == null || booking.getPhone().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Contact phone number is required"));
         }
 
         // Anti-Fraud: Check for duplicate UTR
@@ -59,6 +69,14 @@ public class BookingController {
                 candidateId = "ST-2026-" + rand;
             }
             booking.setId(candidateId);
+        }
+
+        booking.setPrimaryName(booking.getPrimaryName().trim());
+        booking.setPhone(booking.getPhone().trim());
+        if (booking.getEmail() != null) booking.setEmail(booking.getEmail().trim());
+        if (booking.getEmergencyPhone() != null) booking.setEmergencyPhone(booking.getEmergencyPhone().trim());
+        if (booking.getParticipantsCount() <= 0) {
+            booking.setParticipantsCount(1);
         }
 
         booking.setUtrNumber(cleanUtr);
@@ -96,8 +114,10 @@ public class BookingController {
         return bookingRepository.findById(id).map(booking -> {
             booking.setStatus("Confirmed");
             booking.setVerifiedAt(Instant.now().toString());
-            if (body != null && body.containsKey("adminNote")) {
-                booking.setAdminNote(body.get("adminNote"));
+            if (body != null) {
+                if (body.containsKey("adminNote")) booking.setAdminNote(body.get("adminNote"));
+                else if (body.containsKey("note")) booking.setAdminNote(body.get("note"));
+                else booking.setAdminNote("Payment verified with bank records by Admin");
             } else {
                 booking.setAdminNote("Payment verified with bank records by Admin");
             }
@@ -110,8 +130,11 @@ public class BookingController {
         return bookingRepository.findById(id).map(booking -> {
             booking.setStatus("Rejected");
             booking.setVerifiedAt(Instant.now().toString());
-            if (body != null && body.containsKey("adminNote")) {
-                booking.setAdminNote(body.get("adminNote"));
+            if (body != null) {
+                if (body.containsKey("adminNote")) booking.setAdminNote(body.get("adminNote"));
+                else if (body.containsKey("reason")) booking.setAdminNote(body.get("reason"));
+                else if (body.containsKey("note")) booking.setAdminNote(body.get("note"));
+                else booking.setAdminNote("Rejected: Invalid transaction ref or unpaid");
             } else {
                 booking.setAdminNote("Rejected: Invalid transaction ref or unpaid");
             }

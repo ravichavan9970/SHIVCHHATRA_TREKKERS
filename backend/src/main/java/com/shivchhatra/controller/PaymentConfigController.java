@@ -32,6 +32,36 @@ public class PaymentConfigController {
             d.setSecurityNotice("Verified Official Sahyadri Adventure Portal. Scan through any UPI App (GPay, PhonePe, Paytm, BHIM, CRED).");
             return paymentConfigRepository.save(d);
         });
+
+        // Security: Create sanitized copy for public visitors with gatewayKeySecret masked/excluded
+        PaymentConfig safeCopy = new PaymentConfig();
+        safeCopy.setId(config.getId());
+        safeCopy.setMerchantName(config.getMerchantName());
+        safeCopy.setUpiId(config.getUpiId());
+        safeCopy.setMerchantPhone(config.getMerchantPhone());
+        safeCopy.setAccountHolder(config.getAccountHolder());
+        safeCopy.setBankName(config.getBankName());
+        safeCopy.setCustomScannerImage(config.getCustomScannerImage());
+        safeCopy.setEnableCustomScanner(config.isEnableCustomScanner());
+        safeCopy.setEnableDynamicQR(config.isEnableDynamicQR());
+        safeCopy.setPermitFee(config.getPermitFee());
+        safeCopy.setSecurityNotice(config.getSecurityNotice());
+        safeCopy.setEnableGateway(config.isEnableGateway());
+        safeCopy.setGatewayProvider(config.getGatewayProvider());
+        safeCopy.setGatewayKeyId(config.getGatewayKeyId()); // Public Key ID is safe for checkout frontend
+        safeCopy.setGatewayKeySecret(null); // NEVER leak gateway secret key to public visitors
+        safeCopy.setGatewayTestMode(config.isGatewayTestMode());
+
+        return ResponseEntity.ok(safeCopy);
+    }
+
+    @GetMapping("/admin/payment-config")
+    public ResponseEntity<PaymentConfig> getAdminPaymentConfig() {
+        PaymentConfig config = paymentConfigRepository.findById("default").orElseGet(() -> {
+            PaymentConfig d = new PaymentConfig();
+            d.setId("default");
+            return paymentConfigRepository.save(d);
+        });
         return ResponseEntity.ok(config);
     }
 
@@ -59,7 +89,9 @@ public class PaymentConfigController {
         existing.setEnableGateway(updated.isEnableGateway());
         if (updated.getGatewayProvider() != null) existing.setGatewayProvider(updated.getGatewayProvider());
         if (updated.getGatewayKeyId() != null) existing.setGatewayKeyId(updated.getGatewayKeyId());
-        if (updated.getGatewayKeySecret() != null) existing.setGatewayKeySecret(updated.getGatewayKeySecret());
+        if (updated.getGatewayKeySecret() != null && !updated.getGatewayKeySecret().trim().isEmpty() && !updated.getGatewayKeySecret().startsWith("••••")) {
+            existing.setGatewayKeySecret(updated.getGatewayKeySecret().trim());
+        }
         existing.setGatewayTestMode(updated.isGatewayTestMode());
 
         PaymentConfig saved = paymentConfigRepository.save(existing);
