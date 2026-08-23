@@ -138,6 +138,13 @@ export async function rejectAdminBooking(id, reason = 'Rejected by Admin') {
   });
 }
 
+export async function completeAdminBooking(id, note = 'Expedition completed successfully') {
+  return fetchWithAuth(`/admin/bookings/${id}/complete`, {
+    method: 'PUT',
+    body: JSON.stringify({ adminNote: note, note: note })
+  });
+}
+
 export async function deleteAdminBooking(id) {
   return fetchWithAuth(`/admin/bookings/${id}`, {
     method: 'DELETE'

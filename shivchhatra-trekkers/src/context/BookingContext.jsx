@@ -106,6 +106,18 @@ export function BookingProvider({ children }) {
     }));
   };
 
+  const completeBooking = (bookingId, note = "Expedition completed successfully. Preserved in History.") => {
+    setBookings(prev => prev.map(b => {
+      if (b.id !== bookingId) return b;
+      return {
+        ...b,
+        status: "Completed",
+        completedAt: new Date().toISOString(),
+        adminNote: note
+      };
+    }));
+  };
+
   const deleteBooking = (queryOrId) => {
     if (!queryOrId) return;
     const q = queryOrId.trim().toUpperCase();
@@ -177,6 +189,7 @@ export function BookingProvider({ children }) {
       closeBookingModal,
       submitBooking,
       verifyBooking,
+      completeBooking,
       rejectBooking,
       deleteBooking,
       checkUtrDuplicate,

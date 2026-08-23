@@ -163,6 +163,22 @@ public class BookingController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/admin/bookings/{id}/complete")
+    public ResponseEntity<Booking> completeBooking(@PathVariable String id, @RequestBody(required = false) Map<String, String> body) {
+        return bookingRepository.findById(id).map(booking -> {
+            booking.setStatus("Completed");
+            booking.setCompletedAt(Instant.now().toString());
+            if (body != null) {
+                if (body.containsKey("adminNote")) booking.setAdminNote(body.get("adminNote"));
+                else if (body.containsKey("note")) booking.setAdminNote(body.get("note"));
+                else booking.setAdminNote("Expedition successfully completed. Archived to History.");
+            } else {
+                booking.setAdminNote("Expedition successfully completed. Archived to History.");
+            }
+            return ResponseEntity.ok(bookingRepository.save(booking));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/admin/bookings/{id}")
     public ResponseEntity<?> deleteBooking(@PathVariable String id) {
         if (bookingRepository.existsById(id)) {

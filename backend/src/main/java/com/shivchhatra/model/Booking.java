@@ -36,9 +36,10 @@ public class Booking {
     @Column(columnDefinition = "CLOB")
     private String receiptImage;
 
-    private String status; // "Pending Verification" | "Confirmed" | "Rejected"
+    private String status; // "Pending Verification" | "Confirmed" | "Completed" | "Rejected"
     private String submittedAt;
     private String verifiedAt;
+    private String completedAt;
     private String adminNote;
 
     public Booking() {
@@ -194,6 +195,14 @@ public class Booking {
 
     public void setVerifiedAt(String verifiedAt) {
         this.verifiedAt = verifiedAt;
+    }
+
+    public String getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(String completedAt) {
+        this.completedAt = completedAt;
     }
 
     public String getAdminNote() {

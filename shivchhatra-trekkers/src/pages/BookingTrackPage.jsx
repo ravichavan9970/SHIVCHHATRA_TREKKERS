@@ -363,6 +363,12 @@ export default function BookingTrackPage() {
 
   const getStatusDisplay = (status) => {
     switch (status) {
+      case 'Completed':
+        return {
+          badge: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300',
+          text: 'Expedition Completed & Summit Achieved 🚩',
+          desc: 'Trek completed successfully! Hope you enjoyed the Sahyadri expedition with Shivchhatra Trekkers. Your record is preserved in History.'
+        };
       case 'Confirmed':
         return {
           badge: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
