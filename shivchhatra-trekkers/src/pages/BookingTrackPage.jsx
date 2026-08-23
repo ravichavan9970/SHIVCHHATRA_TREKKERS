@@ -78,7 +78,7 @@ export default function BookingTrackPage() {
   const handlePrintPass = (booking) => {
     if (!booking) return;
     try {
-      const printWindow = window.open('', '_blank', 'width=420,height=750');
+      const printWindow = window.open('', '_blank', 'width=800,height=900');
       if (!printWindow) {
         window.print();
         return;
@@ -89,204 +89,84 @@ export default function BookingTrackPage() {
         <html>
           <head>
             <meta charset="utf-8">
-            <title>Receipt - ${booking.id}</title>
+            <title>Boarding Pass - ${booking.id}</title>
             <style>
-              @page {
-                size: 80mm 200mm;
-                margin: 0;
-              }
-              * {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-              }
-              body {
-                width: 80mm;
-                max-width: 80mm;
-                margin: 0 auto;
-                padding: 10px 8px;
-                background: #ffffff;
-                color: #000000;
-                font-family: 'Courier New', Courier, monospace, -apple-system, BlinkMacSystemFont, sans-serif;
-                font-size: 11px;
-                line-height: 1.35;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .receipt {
-                width: 100%;
-                text-align: left;
-              }
-              .center {
-                text-align: center;
-              }
-              .bold {
-                font-weight: 900;
-              }
-              .brand-title {
-                font-size: 13.5px;
-                font-weight: 900;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
-                margin-bottom: 2px;
-              }
-              .sub-title {
-                font-size: 9.5px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-              }
-              .divider {
-                border-top: 1px dashed #000000;
-                margin: 6px 0;
-              }
-              .double-divider {
-                border-top: 2px dashed #000000;
-                margin: 7px 0;
-              }
-              .row {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin: 2.5px 0;
-                font-size: 10.5px;
-              }
-              .row .label {
-                color: #222222;
-                font-weight: 700;
-                text-transform: uppercase;
-                font-size: 10px;
-                flex-shrink: 0;
-              }
-              .row .val {
-                font-weight: 800;
-                text-align: right;
-                max-width: 60%;
-                word-break: break-word;
-              }
-              .squad-list {
-                margin: 4px 0;
-                padding-left: 2px;
-              }
-              .squad-item {
-                font-size: 10px;
-                margin: 1.5px 0;
-                font-weight: 700;
-              }
-              .total-box {
-                font-size: 12.5px;
-                font-weight: 900;
-                margin: 5px 0;
-              }
-              .footer-note {
-                font-size: 9px;
-                text-align: center;
-                margin-top: 6px;
-                line-height: 1.3;
-              }
-              .barcode-mock {
-                font-size: 18px;
-                text-align: center;
-                letter-spacing: 3px;
-                margin: 5px 0 2px;
-                font-weight: bold;
-              }
+              * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+              body { padding: 24px; color: #0f172a; background: #fff; line-height: 1.4; }
+              .pass { border: 2px solid #ea580c; border-radius: 12px; padding: 20px; position: relative; }
+              .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; }
+              .brand { font-size: 20px; font-weight: 800; color: #0f172a; }
+              .sub { font-size: 11px; font-weight: 700; color: #ea580c; text-transform: uppercase; }
+              .ref { text-align: right; font-family: monospace; font-size: 13px; font-weight: 800; color: #ea580c; }
+              .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+              .label { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600; }
+              .val { font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px; }
+              .squad { border-top: 1px solid #e2e8f0; padding-top: 12px; margin-bottom: 16px; }
+              .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+              .pill { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 11px; }
+              .footer { border-top: 2px dashed #cbd5e1; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; }
               @media print {
-                html, body {
-                  width: 80mm;
-                  height: auto;
-                  margin: 0 auto;
-                  padding: 6px 6px;
-                }
+                body { padding: 10px; }
+                @page { margin: 10mm; size: auto; }
               }
             </style>
           </head>
           <body>
-            <div class="receipt">
-              <div class="center">
-                <div class="brand-title">SHIVCHHATRA TREKKERS</div>
-                <div class="sub-title">SAHYADRI EXPEDITION BOOKING RECEIPT</div>
-                <div style="font-size: 9px; margin-top: 2px;">24/7 Helpline: +91 79727 33094</div>
+            <div class="pass">
+              <div class="header">
+                <div>
+                  <div class="brand">SHIVCHHATRA TREKKERS</div>
+                  <div class="sub">Official Sahyadri Expedition Boarding Pass</div>
+                </div>
+                <div>
+                  <div class="ref">${booking.id}</div>
+                  <div style="font-size: 10px; color: #64748b; text-align: right;">Verified Booking</div>
+                </div>
               </div>
 
-              <div class="divider"></div>
-
-              <div class="row">
-                <span class="label">RECEIPT NO:</span>
-                <span class="val bold">${booking.id}</span>
-              </div>
-              <div class="row">
-                <span class="label">DATE:</span>
-                <span class="val">${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-              </div>
-              <div class="row">
-                <span class="label">STATUS:</span>
-                <span class="val bold">${(booking.status || 'CONFIRMED').toUpperCase()}</span>
-              </div>
-
-              <div class="divider"></div>
-
-              <div class="row">
-                <span class="label">TREK / FORT:</span>
-                <span class="val bold">${booking.trekTitle}</span>
-              </div>
-              <div class="row">
-                <span class="label">BATCH DATE:</span>
-                <span class="val bold">${booking.batchDate}</span>
-              </div>
-              <div class="row">
-                <span class="label">PICKUP POINT:</span>
-                <span class="val">${booking.pickupCity} - ${booking.pickupSpot}</span>
+              <div class="grid">
+                <div>
+                  <div class="label">Expedition</div>
+                  <div class="val">${booking.trekTitle}</div>
+                </div>
+                <div>
+                  <div class="label">Primary Trekker</div>
+                  <div class="val">${booking.primaryName}</div>
+                </div>
+                <div>
+                  <div class="label">Contact Mobile</div>
+                  <div class="val">${booking.phone}</div>
+                </div>
+                <div>
+                  <div class="label">Departure Batch</div>
+                  <div class="val">${booking.batchDate}</div>
+                </div>
+                <div>
+                  <div class="label">Pickup Location</div>
+                  <div class="val">${booking.pickupCity} (${booking.pickupSpot})</div>
+                </div>
+                <div>
+                  <div class="label">Amount Paid</div>
+                  <div class="val">₹${booking.amountPaid}</div>
+                </div>
               </div>
 
-              <div class="divider"></div>
-
-              <div class="row">
-                <span class="label">LEAD TREKKER:</span>
-                <span class="val bold">${booking.primaryName}</span>
-              </div>
-              <div class="row">
-                <span class="label">CONTACT NO:</span>
-                <span class="val">${booking.phone}</span>
-              </div>
-              <div class="row">
-                <span class="label">SQUAD COUNT:</span>
-                <span class="val bold">${booking.participantsCount} Trekker(s)</span>
+              <div class="squad">
+                <div class="label">Participants Roster (${booking.participantsCount})</div>
+                <div class="pills">
+                  ${booking.participants?.map((p, idx) => `
+                    <span class="pill">${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})</span>
+                  `).join('')}
+                </div>
               </div>
 
-              <div style="margin-top: 4px; font-size: 9.5px; font-weight: bold; text-transform: uppercase;">Participants List:</div>
-              <div class="squad-list">
-                ${booking.participants && booking.participants.length > 0 ? booking.participants.map((p, idx) => `
-                  <div class="squad-item">${idx + 1}. ${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})</div>
-                `).join('') : `<div class="squad-item">1. ${booking.primaryName}</div>`}
-              </div>
-
-              <div class="double-divider"></div>
-
-              <div class="row total-box">
-                <span class="label" style="font-size: 11.5px;">TOTAL AMOUNT PAID:</span>
-                <span class="val" style="font-size: 13px;">₹${booking.amountPaid}</span>
-              </div>
-              <div class="row">
-                <span class="label">PAYMENT REF (UTR):</span>
-                <span class="val" style="font-family: monospace;">${booking.utrNumber || 'VERIFIED'}</span>
-              </div>
-              <div class="row">
-                <span class="label">PAYMENT MODE:</span>
-                <span class="val">UPI / ONLINE</span>
-              </div>
-
-              <div class="double-divider"></div>
-
-              <div class="center">
-                <div class="barcode-mock">||||| | |||| || |||||| | |||||</div>
-                <div style="font-size: 8.5px; font-family: monospace;">* ${booking.id} *</div>
-              </div>
-
-              <div class="footer-note">
-                *** THANK YOU FOR TREKKING WITH US ***<br/>
-                Please present this POS receipt at the boarding pickup spot.<br/>
-                Valid Govt Photo ID is required on trek day.
+              <div class="footer">
+                <div>
+                  <strong>Status:</strong> ${booking.status} • <strong>UTR:</strong> ${booking.utrNumber || 'N/A'}
+                </div>
+                <div>
+                  🚩 Carry a valid Government Photo ID on trek day.
+                </div>
               </div>
             </div>
 
