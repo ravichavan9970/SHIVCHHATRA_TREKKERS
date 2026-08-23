@@ -69,19 +69,14 @@ public class ReviewController {
         if (rating > 5) rating = 5;
         review.setRating(rating);
 
-        // Sanitize string lengths
-        String name = review.getUserName().trim();
-        if (name.length() > 100) name = name.substring(0, 100);
-        review.setUserName(name);
-
-        String comment = review.getComment().trim();
-        if (comment.length() > 1000) comment = comment.substring(0, 1000);
-        review.setComment(comment);
-
+        // Sanitize string lengths and remove script/HTML injection
+        review.setUserName(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(review.getUserName(), 100));
+        review.setComment(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(review.getComment(), 1000));
         if (review.getCity() != null) {
-            String city = review.getCity().trim();
-            if (city.length() > 80) city = city.substring(0, 80);
-            review.setCity(city);
+            review.setCity(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(review.getCity(), 80));
+        }
+        if (review.getTag() != null) {
+            review.setTag(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(review.getTag(), 50));
         }
 
         if (review.getId() == null || review.getId().isEmpty()) {

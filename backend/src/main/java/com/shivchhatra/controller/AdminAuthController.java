@@ -18,9 +18,34 @@ public class AdminAuthController {
     @Value("${shivchhatra.admin.secret:ShivPasss!****2026}")
     private String secretToken;
 
+    private static final Map<String, Integer> failedAttempts = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final Map<String, Long> lockoutTimestamps = new java.util.concurrent.ConcurrentHashMap<>();
+
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> body) {
-        String passcode = body.get("passcode");
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> body, jakarta.servlet.http.HttpServletRequest request) {
+        String clientIp = request.getHeader("X-Forwarded-For");
+        if (clientIp != null && !clientIp.trim().isEmpty()) {
+            clientIp = clientIp.split(",")[0].trim();
+        } else {
+            clientIp = request.getRemoteAddr() != null ? request.getRemoteAddr() : "unknown";
+        }
+
+        long now = System.currentTimeMillis();
+        Long lockoutUntil = lockoutTimestamps.get(clientIp);
+        if (lockoutUntil != null) {
+            if (now < lockoutUntil) {
+                long remainingSec = (lockoutUntil - now) / 1000;
+                Map<String, Object> lockedResp = new HashMap<>();
+                lockedResp.put("authenticated", false);
+                lockedResp.put("error", "Security Lockout: Too many failed login attempts. Please wait " + remainingSec + "s.");
+                return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(lockedResp);
+            } else {
+                lockoutTimestamps.remove(clientIp);
+                failedAttempts.remove(clientIp);
+            }
+        }
+
+        String passcode = body != null ? body.get("passcode") : null;
         Map<String, Object> response = new HashMap<>();
 
         if (passcode != null && (
@@ -29,6 +54,8 @@ public class AdminAuthController {
             passcode.equals("ShivPasss!****2026") || 
             passcode.equals("Shivchhatra#!*&+$Sahyadri!****2026")
         )) {
+            failedAttempts.remove(clientIp);
+            lockoutTimestamps.remove(clientIp);
             response.put("authenticated", true);
             response.put("token", secretToken);
             response.put("role", "SUPER_ADMIN");
@@ -37,8 +64,13 @@ public class AdminAuthController {
             return ResponseEntity.ok(response);
         }
 
+        int fails = failedAttempts.compute(clientIp, (k, v) -> v == null ? 1 : v + 1);
+        if (fails >= 5) {
+            lockoutTimestamps.put(clientIp, now + 10 * 60 * 1000); // 10 minute lockout
+        }
+
         response.put("authenticated", false);
-        response.put("error", "Access Denied: Invalid Master Security Passcode");
+        response.put("error", "Access Denied: Invalid Master Security Passcode" + (fails >= 3 ? " (" + (5 - fails) + " attempts remaining before lockout)" : ""));
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 

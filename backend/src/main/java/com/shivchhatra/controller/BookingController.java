@@ -71,10 +71,12 @@ public class BookingController {
             booking.setId(candidateId);
         }
 
-        booking.setPrimaryName(booking.getPrimaryName().trim());
-        booking.setPhone(booking.getPhone().trim());
-        if (booking.getEmail() != null) booking.setEmail(booking.getEmail().trim());
-        if (booking.getEmergencyPhone() != null) booking.setEmergencyPhone(booking.getEmergencyPhone().trim());
+        booking.setPrimaryName(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(booking.getPrimaryName(), 100));
+        booking.setPhone(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(booking.getPhone(), 25));
+        if (booking.getEmail() != null) booking.setEmail(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(booking.getEmail(), 120));
+        if (booking.getEmergencyPhone() != null) booking.setEmergencyPhone(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(booking.getEmergencyPhone(), 25));
+        if (booking.getPickupCity() != null) booking.setPickupCity(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(booking.getPickupCity(), 80));
+        if (booking.getPickupSpot() != null) booking.setPickupSpot(com.shivchhatra.security.SanitizationUtil.sanitizeWithLimit(booking.getPickupSpot(), 100));
         if (booking.getParticipantsCount() <= 0) {
             booking.setParticipantsCount(1);
         }
