@@ -515,7 +515,7 @@ export default function BookingModal() {
 
               <div class="footer">
                 <div>24/7 Helpline: <strong>+91 79727 33094</strong></div>
-                <div>Jai Shivray! Show this pass at boarding pickup spot.</div>
+                <div>Show this official pass at the boarding pickup point.</div>
               </div>
             </div>
 
@@ -1259,7 +1259,7 @@ export default function BookingModal() {
                     Booking Confirmed!
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300">
-                    जय शिवराय! Your seat for the Sahyadri expedition is secured.
+                    Your seat for the Sahyadri expedition is confirmed and secured.
                   </p>
                 </div>
 
