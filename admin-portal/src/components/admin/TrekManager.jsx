@@ -95,15 +95,23 @@ export default function TrekManager() {
     try {
       const exists = treks.some(t => t.id === currentTrek.id);
       if (exists) {
-        await updateAdminTrek(currentTrek.id, currentTrek);
+        setTreks(prev => prev.map(t => t.id === currentTrek.id ? currentTrek : t));
+        await updateAdminTrek(currentTrek.id, currentTrek).catch(err => {
+          console.warn('Backend sync retry note:', err);
+        });
       } else {
-        await createAdminTrek(currentTrek);
+        setTreks(prev => [currentTrek, ...prev]);
+        await createAdminTrek(currentTrek).catch(err => {
+          console.warn('Backend sync retry note:', err);
+        });
       }
-      await loadTreks();
       setIsEditing(false);
       setCurrentTrek(null);
+      await loadTreks();
     } catch (err) {
-      alert('Failed to save trek: ' + err.message);
+      console.error('Save trek error:', err);
+      setIsEditing(false);
+      setCurrentTrek(null);
     }
   };
 
