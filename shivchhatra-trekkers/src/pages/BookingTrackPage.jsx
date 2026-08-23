@@ -97,22 +97,51 @@ export default function BookingTrackPage() {
             <title>Boarding Pass - ${booking.id}</title>
             <style>
               * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-              body { padding: 24px; color: #0f172a; background: #fff; line-height: 1.4; }
-              .pass { border: 2px solid #ea580c; border-radius: 12px; padding: 20px; position: relative; }
-              .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; }
+              html, body {
+                margin: 0 !important;
+                padding: 10px !important;
+                background: #fff;
+                color: #0f172a;
+                line-height: 1.35;
+                height: auto !important;
+                min-height: 0 !important;
+              }
+              .pass {
+                border: 2px solid #ea580c;
+                border-radius: 12px;
+                padding: 18px;
+                position: relative;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+              }
+              .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 14px; }
               .brand { font-size: 20px; font-weight: 800; color: #0f172a; }
               .sub { font-size: 11px; font-weight: 700; color: #ea580c; text-transform: uppercase; }
               .ref { text-align: right; font-family: monospace; font-size: 13px; font-weight: 800; color: #ea580c; }
-              .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+              .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
               .label { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600; }
               .val { font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px; }
-              .squad { border-top: 1px solid #e2e8f0; padding-top: 12px; margin-bottom: 16px; }
+              .squad { border-top: 1px solid #e2e8f0; padding-top: 12px; margin-bottom: 14px; }
               .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
               .pill { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 11px; }
               .footer { border-top: 2px dashed #cbd5e1; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; }
+              @page {
+                size: auto;
+                margin: 0;
+              }
               @media print {
-                body { padding: 10px; }
-                @page { margin: 10mm; size: auto; }
+                html, body {
+                  margin: 0 !important;
+                  padding: 8mm !important;
+                  height: auto !important;
+                }
+                .pass {
+                  margin: 0 !important;
+                  page-break-after: avoid !important;
+                  page-break-before: avoid !important;
+                  page-break-inside: avoid !important;
+                  break-inside: avoid !important;
+                }
               }
             </style>
           </head>
@@ -200,15 +229,15 @@ export default function BookingTrackPage() {
       container.style.position = 'absolute';
       container.style.left = '-9999px';
       container.style.top = '0';
-      container.style.width = '680px';
-      container.style.padding = '16px';
+      container.style.width = '650px';
+      container.style.padding = '0';
       container.style.background = '#ffffff';
       container.style.color = '#0f172a';
       container.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
       container.innerHTML = `
         <div style="border: 2px solid #ea580c; border-radius: 12px; padding: 20px; background: #ffffff; box-sizing: border-box;">
-          <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 14px;">
             <div>
               <div style="font-size: 20px; font-weight: 800; color: #0f172a;">SHIVCHHATRA TREKKERS</div>
               <div style="font-size: 11px; font-weight: 700; color: #ea580c; text-transform: uppercase;">Official Expedition Boarding Pass</div>
@@ -221,7 +250,7 @@ export default function BookingTrackPage() {
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;">
             <div>
               <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Lead Trekker</div>
               <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.primaryName}</div>
@@ -248,7 +277,7 @@ export default function BookingTrackPage() {
             </div>
           </div>
 
-          <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-bottom: 16px;">
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-bottom: 14px;">
             <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Registered Squad (${booking.participantsCount} Trekkers):</div>
             <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
               ${booking.participants ? booking.participants.map((p, idx) => `
@@ -276,20 +305,17 @@ export default function BookingTrackPage() {
       document.body.removeChild(container);
 
       const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 190; // mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // Exact custom 1-page format matching content perfectly with no extra blank page
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
-        format: 'a5'
+        format: [imgWidth + 12, imgHeight + 12]
       });
-      
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10;
-      const renderWidth = pageWidth - (margin * 2);
-      const renderHeight = (canvas.height * renderWidth) / canvas.width;
-      const posY = (pageHeight - renderHeight) / 2;
 
-      pdf.addImage(imgData, 'PNG', margin, Math.max(posY, 10), renderWidth, renderHeight);
+      pdf.addImage(imgData, 'PNG', 6, 6, imgWidth, imgHeight);
       pdf.save(`Shivchhatra_Boarding_Pass_${booking.id}.pdf`);
     } catch (err) {
       console.error('PDF export error:', err);
