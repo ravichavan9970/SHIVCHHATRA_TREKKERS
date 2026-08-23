@@ -22,7 +22,7 @@ export function TrekProvider({ children }) {
   useEffect(() => {
     async function fetchServerTreks() {
       const serverTreks = await getLiveTreks();
-      if (Array.isArray(serverTreks)) {
+      if (Array.isArray(serverTreks) && serverTreks.length > 0) {
         setTreks(serverTreks);
       }
     }
