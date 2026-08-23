@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Compass, 
@@ -17,15 +17,38 @@ import {
 import { useTreks } from '../../context/TrekContext';
 import { useBookings } from '../../context/BookingContext';
 import { useReviews } from '../../context/ReviewContext';
+import { getLiveBookingStats } from '../../services/apiService';
 
 export default function HeroSection({ onExploreClick }) {
   const { treks, searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, categories } = useTreks();
   const { bookings } = useBookings();
   const { stats, openReviewModal } = useReviews();
+  const [liveCompletedTrekkers, setLiveCompletedTrekkers] = useState(null);
 
-  const totalTrekkersCount = bookings
-    .filter(b => b.status === 'Confirmed' || b.status === 'Completed')
+  useEffect(() => {
+    let isMounted = true;
+    const fetchStats = async () => {
+      const data = await getLiveBookingStats();
+      if (isMounted && data && typeof data.completedTrekkers === 'number') {
+        setLiveCompletedTrekkers(data.completedTrekkers);
+      }
+    };
+    fetchStats();
+    const interval = setInterval(fetchStats, 8000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Strictly count completed trekkers from live server database + local completed bookings
+  const localCompletedCount = bookings
+    .filter(b => b.status === 'Completed')
     .reduce((sum, b) => sum + (Number(b.participantsCount) || 1), 0);
+
+  const totalTrekkersCount = liveCompletedTrekkers !== null 
+    ? liveCompletedTrekkers 
+    : localCompletedCount;
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

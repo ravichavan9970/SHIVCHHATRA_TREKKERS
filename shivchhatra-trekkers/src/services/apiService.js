@@ -44,6 +44,17 @@ export async function trackLiveBooking(query) {
   return await res.json();
 }
 
+export async function getLiveBookingStats() {
+  try {
+    const res = await fetch(`${API_BASE}/bookings/stats`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('Backend offline, using fallback booking stats:', err);
+    return null;
+  }
+}
+
 // Public Reviews & Community Rating API
 export async function getLiveReviews() {
   try {

@@ -40,6 +40,23 @@ public class BookingController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/bookings/stats")
+    public Map<String, Object> getPublicBookingStats() {
+        List<Booking> all = bookingRepository.findAll();
+        int completedTrekkers = all.stream()
+                .filter(b -> "Completed".equalsIgnoreCase(b.getStatus()))
+                .mapToInt(b -> b.getParticipantsCount() > 0 ? b.getParticipantsCount() : 1)
+                .sum();
+        int totalExpeditions = (int) all.stream()
+                .filter(b -> "Completed".equalsIgnoreCase(b.getStatus()))
+                .count();
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("completedTrekkers", completedTrekkers);
+        stats.put("completedExpeditions", totalExpeditions);
+        return stats;
+    }
+
     @PostMapping("/bookings")
     public ResponseEntity<?> submitBooking(@RequestBody Booking booking) {
         if (booking.getUtrNumber() == null || booking.getUtrNumber().trim().length() < 6) {
