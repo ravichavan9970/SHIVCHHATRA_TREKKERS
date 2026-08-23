@@ -462,8 +462,28 @@ export default function BookingModal() {
                 border-radius: 12px;
                 padding: 18px;
                 position: relative;
+                overflow: hidden;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+              }
+              .watermark-wrap {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                opacity: 0.08;
+                pointer-events: none;
+                text-align: center;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 0;
+              }
+              .pass-content {
+                position: relative;
+                z-index: 1;
               }
               .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 14px; }
               .brand { font-size: 20px; font-weight: 800; color: #0f172a; }
@@ -498,58 +518,66 @@ export default function BookingModal() {
           </head>
           <body>
             <div class="pass">
-              <div class="header">
-                <div>
-                  <div class="brand">SHIVCHHATRA TREKKERS</div>
-                  <div class="sub">Official Expedition Boarding Pass</div>
-                  <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Trek: <strong>${booking.trekTitle}</strong></div>
-                </div>
-                <div class="ref">
-                  <div style="font-size: 10px; color: #64748b;">Pass Reference</div>
-                  <div>${booking.id}</div>
-                  <div style="font-size: 10px; color: #16a34a; margin-top: 2px;">● Status: ${booking.status}</div>
-                </div>
+              <!-- Watermark -->
+              <div class="watermark-wrap">
+                <img src="/logo.jpg" alt="" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 6px;" />
+                <div style="font-size: 18px; font-weight: 900; letter-spacing: 2px; color: #0f172a; text-transform: uppercase;">SHIVCHHATRA TREKKERS</div>
               </div>
 
-              <div class="grid">
-                <div>
-                  <div class="label">Lead Trekker</div>
-                  <div class="val">${booking.primaryName}</div>
+              <div class="pass-content">
+                <div class="header">
+                  <div>
+                    <div class="brand">SHIVCHHATRA TREKKERS</div>
+                    <div class="sub">Official Expedition Boarding Pass</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Trek: <strong>${booking.trekTitle}</strong></div>
+                  </div>
+                  <div class="ref">
+                    <div style="font-size: 10px; color: #64748b;">Pass Reference</div>
+                    <div>${booking.id}</div>
+                    <div style="font-size: 10px; color: #16a34a; margin-top: 2px;">● Status: ${booking.status}</div>
+                  </div>
                 </div>
-                <div>
-                  <div class="label">Mobile / WhatsApp</div>
-                  <div class="val">${booking.phone}</div>
-                </div>
-                <div>
-                  <div class="label">Departure Batch</div>
-                  <div class="val" style="color: #ea580c;">${booking.batchDate}</div>
-                </div>
-                <div>
-                  <div class="label">Pickup Point</div>
-                  <div class="val">${booking.pickupCity} - ${booking.pickupSpot}</div>
-                </div>
-                <div>
-                  <div class="label">Total Paid</div>
-                  <div class="val" style="color: #16a34a;">₹${booking.amountPaid}</div>
-                </div>
-                <div>
-                  <div class="label">Bank Reference (UTR)</div>
-                  <div class="val" style="font-family: monospace; font-size: 11px;">${booking.utrNumber || 'Verified'}</div>
-                </div>
-              </div>
 
-              <div class="squad">
-                <div class="label">Registered Squad (${booking.participantsCount} Trekkers):</div>
-                <div class="pills">
-                  ${booking.participants ? booking.participants.map((p, idx) => `
-                    <div class="pill">${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})</div>
-                  `).join('') : `<div class="pill">${booking.primaryName}</div>`}
+                <div class="grid">
+                  <div>
+                    <div class="label">Lead Trekker</div>
+                    <div class="val">${booking.primaryName}</div>
+                  </div>
+                  <div>
+                    <div class="label">Mobile / WhatsApp</div>
+                    <div class="val">${booking.phone}</div>
+                  </div>
+                  <div>
+                    <div class="label">Departure Batch</div>
+                    <div class="val" style="color: #ea580c;">${booking.batchDate}</div>
+                  </div>
+                  <div>
+                    <div class="label">Pickup Point</div>
+                    <div class="val">${booking.pickupCity} - ${booking.pickupSpot}</div>
+                  </div>
+                  <div>
+                    <div class="label">Total Paid</div>
+                    <div class="val" style="color: #16a34a;">₹${booking.amountPaid}</div>
+                  </div>
+                  <div>
+                    <div class="label">Bank Reference (UTR)</div>
+                    <div class="val" style="font-family: monospace; font-size: 11px;">${booking.utrNumber || 'Verified'}</div>
+                  </div>
                 </div>
-              </div>
 
-              <div class="footer">
-                <div>24/7 Helpline: <strong>+91 79727 33094</strong></div>
-                <div>Show this official pass at the boarding pickup point.</div>
+                <div class="squad">
+                  <div class="label">Registered Squad (${booking.participantsCount} Trekkers):</div>
+                  <div class="pills">
+                    ${booking.participants ? booking.participants.map((p, idx) => `
+                      <div class="pill">${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})</div>
+                    `).join('') : `<div class="pill">${booking.primaryName}</div>`}
+                  </div>
+                </div>
+
+                <div class="footer">
+                  <div>24/7 Helpline: <strong>+91 79727 33094</strong></div>
+                  <div>Show this official pass at the boarding pickup point.</div>
+                </div>
               </div>
             </div>
 
@@ -587,61 +615,69 @@ export default function BookingModal() {
       container.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
       container.innerHTML = `
-        <div style="border: 2px solid #ea580c; border-radius: 12px; padding: 20px; background: #ffffff; box-sizing: border-box;">
-          <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 14px;">
-            <div>
-              <div style="font-size: 20px; font-weight: 800; color: #0f172a;">SHIVCHHATRA TREKKERS</div>
-              <div style="font-size: 11px; font-weight: 700; color: #ea580c; text-transform: uppercase;">Official Expedition Boarding Pass</div>
-              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Trek: <strong style="color: #0f172a;">${booking.trekTitle}</strong></div>
-            </div>
-            <div style="text-align: right; font-family: monospace; font-size: 13px; font-weight: 800; color: #ea580c;">
-              <div style="font-size: 10px; color: #64748b; font-weight: normal;">Pass Reference</div>
-              <div>${booking.id}</div>
-              <div style="font-size: 10px; color: #16a34a; margin-top: 2px;">● Status: ${booking.status}</div>
-            </div>
+        <div style="border: 2px solid #ea580c; border-radius: 12px; padding: 20px; background: #ffffff; box-sizing: border-box; position: relative; overflow: hidden;">
+          <!-- Watermark -->
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.08; pointer-events: none; text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 0;">
+            <img src="/logo.jpg" alt="" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 6px;" />
+            <div style="font-size: 18px; font-weight: 900; letter-spacing: 2px; color: #0f172a; text-transform: uppercase;">SHIVCHHATRA TREKKERS</div>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;">
-            <div>
-              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Lead Trekker</div>
-              <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.primaryName}</div>
+          <div style="position: relative; z-index: 1;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 14px;">
+              <div>
+                <div style="font-size: 20px; font-weight: 800; color: #0f172a;">SHIVCHHATRA TREKKERS</div>
+                <div style="font-size: 11px; font-weight: 700; color: #ea580c; text-transform: uppercase;">Official Expedition Boarding Pass</div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Trek: <strong style="color: #0f172a;">${booking.trekTitle}</strong></div>
+              </div>
+              <div style="text-align: right; font-family: monospace; font-size: 13px; font-weight: 800; color: #ea580c;">
+                <div style="font-size: 10px; color: #64748b; font-weight: normal;">Pass Reference</div>
+                <div>${booking.id}</div>
+                <div style="font-size: 10px; color: #16a34a; margin-top: 2px;">● Status: ${booking.status}</div>
+              </div>
             </div>
-            <div>
-              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Mobile / WhatsApp</div>
-              <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.phone}</div>
-            </div>
-            <div>
-              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Departure Batch</div>
-              <div style="font-size: 13px; font-weight: 700; color: #ea580c; margin-top: 2px;">${booking.batchDate}</div>
-            </div>
-            <div>
-              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Pickup Point</div>
-              <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.pickupCity} - ${booking.pickupSpot}</div>
-            </div>
-            <div>
-              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Total Paid</div>
-              <div style="font-size: 13px; font-weight: 800; color: #16a34a; margin-top: 2px;">₹${booking.amountPaid}</div>
-            </div>
-            <div>
-              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Bank Reference (UTR)</div>
-              <div style="font-size: 11px; font-family: monospace; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.utrNumber || 'Verified'}</div>
-            </div>
-          </div>
 
-          <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-bottom: 14px;">
-            <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Registered Squad (${booking.participantsCount} Trekkers):</div>
-            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
-              ${booking.participants ? booking.participants.map((p, idx) => `
-                <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 11px; color: #1e293b;">
-                  ${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})
-                </div>
-              `).join('') : `<div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 11px; color: #1e293b;">${booking.primaryName}</div>`}
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;">
+              <div>
+                <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Lead Trekker</div>
+                <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.primaryName}</div>
+              </div>
+              <div>
+                <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Mobile / WhatsApp</div>
+                <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.phone}</div>
+              </div>
+              <div>
+                <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Departure Batch</div>
+                <div style="font-size: 13px; font-weight: 700; color: #ea580c; margin-top: 2px;">${booking.batchDate}</div>
+              </div>
+              <div>
+                <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Pickup Point</div>
+                <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.pickupCity} - ${booking.pickupSpot}</div>
+              </div>
+              <div>
+                <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Total Paid</div>
+                <div style="font-size: 13px; font-weight: 800; color: #16a34a; margin-top: 2px;">₹${booking.amountPaid}</div>
+              </div>
+              <div>
+                <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Bank Reference (UTR)</div>
+                <div style="font-size: 11px; font-family: monospace; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.utrNumber || 'Verified'}</div>
+              </div>
             </div>
-          </div>
 
-          <div style="border-top: 2px dashed #cbd5e1; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b;">
-            <div>24/7 Helpline: <strong style="color: #0f172a;">+91 79727 33094</strong></div>
-            <div>Show this official pass at the boarding pickup point.</div>
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-bottom: 14px;">
+              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Registered Squad (${booking.participantsCount} Trekkers):</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                ${booking.participants ? booking.participants.map((p, idx) => `
+                  <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 11px; color: #1e293b;">
+                    ${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})
+                  </div>
+                `).join('') : `<div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 11px; color: #1e293b;">${booking.primaryName}</div>`}
+              </div>
+            </div>
+
+            <div style="border-top: 2px dashed #cbd5e1; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b;">
+              <div>24/7 Helpline: <strong style="color: #0f172a;">+91 79727 33094</strong></div>
+              <div>Show this official pass at the boarding pickup point.</div>
+            </div>
           </div>
         </div>
       `;
@@ -1407,8 +1443,11 @@ export default function BookingModal() {
                   className="p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-orange-500/40 shadow-2xl relative overflow-hidden space-y-4"
                 >
                   {/* Watermark */}
-                  <div className="absolute right-4 -bottom-6 text-7xl font-black text-slate-800/20 font-heading pointer-events-none select-none">
-                    SHIVCHHATRA
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.07] z-0">
+                    <img src="/logo.jpg" alt="" className="w-28 h-28 rounded-full object-cover mb-2" />
+                    <span className="text-lg sm:text-xl font-black tracking-widest text-white uppercase font-heading text-center">
+                      SHIVCHHATRA TREKKERS
+                    </span>
                   </div>
 
                   {/* Header of Pass */}
