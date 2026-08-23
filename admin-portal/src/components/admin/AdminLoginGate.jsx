@@ -17,25 +17,48 @@ export default function AdminLoginGate({ onLoginSuccess }) {
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isServerOffline, setIsServerOffline] = useState(false);
+  const [serverState, setServerState] = useState('connecting'); // 'online' | 'connecting' | 'offline'
 
   useEffect(() => {
-    // Check if backend server is active
+    let isMounted = true;
+    let timer = null;
+
     const checkServerStatus = async () => {
       try {
         const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
         const apiBase = import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:8080/api' : 'https://shivchhatra-trekkers-bjqg.onrender.com/api');
-        const res = await fetch(`${apiBase}/treks`, { method: 'GET' });
-        if (!res.ok && res.status >= 500) {
-          setIsServerOffline(true);
-        } else {
-          setIsServerOffline(false);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        
+        const res = await fetch(`${apiBase}/treks`, { 
+          method: 'GET',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (isMounted) {
+          if (res.ok || res.status < 500) {
+            setServerState('online');
+          } else {
+            setServerState('connecting');
+          }
         }
       } catch (err) {
-        setIsServerOffline(true);
+        if (isMounted) {
+          // If aborted or network wait, it's waking up
+          setServerState(prev => prev === 'online' ? 'online' : 'connecting');
+        }
       }
     };
+
     checkServerStatus();
+    timer = setInterval(checkServerStatus, 4000);
+
+    return () => {
+      isMounted = false;
+      if (timer) clearInterval(timer);
+    };
   }, []);
 
   const handleSubmit = async (e) => {
@@ -100,29 +123,48 @@ export default function AdminLoginGate({ onLoginSuccess }) {
             <h1 className="text-2xl font-black text-white font-heading">
               Shivchhatra Admin Hub
             </h1>
-            <p className="text-xs font-semibold text-orange-400 uppercase tracking-wider mt-0.5">
+            <p className="text-xs font-semibold text-orange-400 tracking-wider uppercase mt-1">
               Enterprise Operations & Security Gateway
             </p>
           </div>
         </div>
 
-        {/* Server Status Warning - Only shown if server is Non-Active / Offline */}
-        {isServerOffline && (
-          <motion.div
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-3 rounded-2xl bg-red-950/40 border border-red-500/40 flex items-center justify-between text-xs"
-          >
-            <div className="flex items-center space-x-2">
-              <Server className="w-4 h-4 text-red-400" />
-              <span className="text-slate-300 font-medium">Backend Server</span>
-            </div>
-            <div className="flex items-center space-x-1.5 text-red-400 font-bold">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-              <span>Non-Active / Offline</span>
-            </div>
-          </motion.div>
-        )}
+        {/* Server Status Live Indicator */}
+        <div className="space-y-2">
+          {serverState === 'online' && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 flex items-center justify-between text-xs"
+            >
+              <div className="flex items-center space-x-2">
+                <Server className="w-4 h-4 text-emerald-400" />
+                <span className="text-slate-300 font-medium">Backend Server</span>
+              </div>
+              <div className="flex items-center space-x-1.5 text-emerald-400 font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Active & Online</span>
+              </div>
+            </motion.div>
+          )}
+
+          {serverState === 'connecting' && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-3 rounded-2xl bg-amber-950/40 border border-amber-500/40 flex items-center justify-between text-xs"
+            >
+              <div className="flex items-center space-x-2">
+                <Server className="w-4 h-4 text-amber-400" />
+                <span className="text-slate-300 font-medium">Backend Server</span>
+              </div>
+              <div className="flex items-center space-x-1.5 text-amber-400 font-bold">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                <span>Connecting / Ready</span>
+              </div>
+            </motion.div>
+          )}
+        </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
