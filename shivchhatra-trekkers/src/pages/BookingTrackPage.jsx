@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 import { 
   Search, 
   TicketCheck, 
@@ -12,9 +14,11 @@ import {
   Phone, 
   MapPin, 
   Calendar, 
-  Sparkles,
-  ShieldAlert,
-  Trash2
+  Sparkles, 
+  ShieldAlert, 
+  Trash2,
+  Download,
+  FileText
 } from 'lucide-react';
 import { useBookings } from '../context/BookingContext';
 import { trackLiveBooking } from '../services/apiService';
@@ -25,6 +29,7 @@ export default function BookingTrackPage() {
   const [searchedBooking, setSearchedBooking] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
@@ -187,6 +192,113 @@ export default function BookingTrackPage() {
     }
   };
 
+  const handleDownloadPDF = async (booking) => {
+    if (!booking) return;
+    setIsDownloadingPdf(true);
+    try {
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '680px';
+      container.style.padding = '16px';
+      container.style.background = '#ffffff';
+      container.style.color = '#0f172a';
+      container.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+
+      container.innerHTML = `
+        <div style="border: 2px solid #ea580c; border-radius: 12px; padding: 20px; background: #ffffff; box-sizing: border-box;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 20px; font-weight: 800; color: #0f172a;">SHIVCHHATRA TREKKERS</div>
+              <div style="font-size: 11px; font-weight: 700; color: #ea580c; text-transform: uppercase;">Official Expedition Boarding Pass</div>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Trek: <strong style="color: #0f172a;">${booking.trekTitle}</strong></div>
+            </div>
+            <div style="text-align: right; font-family: monospace; font-size: 13px; font-weight: 800; color: #ea580c;">
+              <div style="font-size: 10px; color: #64748b; font-weight: normal;">Pass Reference</div>
+              <div>${booking.id}</div>
+              <div style="font-size: 10px; color: #16a34a; margin-top: 2px;">● Status: ${booking.status}</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Lead Trekker</div>
+              <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.primaryName}</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Mobile / WhatsApp</div>
+              <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.phone}</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Departure Batch</div>
+              <div style="font-size: 13px; font-weight: 700; color: #ea580c; margin-top: 2px;">${booking.batchDate}</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Pickup Point</div>
+              <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.pickupCity} - ${booking.pickupSpot}</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Total Paid</div>
+              <div style="font-size: 13px; font-weight: 800; color: #16a34a; margin-top: 2px;">₹${booking.amountPaid}</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Bank Reference (UTR)</div>
+              <div style="font-size: 11px; font-family: monospace; font-weight: 700; color: #1e293b; margin-top: 2px;">${booking.utrNumber || 'Verified'}</div>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-bottom: 16px;">
+            <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600;">Registered Squad (${booking.participantsCount} Trekkers):</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+              ${booking.participants ? booking.participants.map((p, idx) => `
+                <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 11px; color: #1e293b;">
+                  ${p.name || `Trekker ${idx + 1}`} (${p.age}y, ${p.gender})
+                </div>
+              `).join('') : `<div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-size: 11px;">${booking.primaryName}</div>`}
+            </div>
+          </div>
+
+          <div style="border-top: 2px dashed #cbd5e1; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b;">
+            <div>24/7 Helpline: <strong style="color: #0f172a;">+91 79727 33094</strong></div>
+            <div>Show this official pass at the boarding pickup point.</div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(container);
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a5'
+      });
+      
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const renderWidth = pageWidth - (margin * 2);
+      const renderHeight = (canvas.height * renderWidth) / canvas.width;
+      const posY = (pageHeight - renderHeight) / 2;
+
+      pdf.addImage(imgData, 'PNG', margin, Math.max(posY, 10), renderWidth, renderHeight);
+      pdf.save(`Shivchhatra_Boarding_Pass_${booking.id}.pdf`);
+    } catch (err) {
+      console.error('PDF export error:', err);
+      handlePrintPass(booking);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
   const getStatusDisplay = (status) => {
     switch (status) {
       case 'Confirmed':
@@ -346,7 +458,16 @@ export default function BookingTrackPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  onClick={() => handleDownloadPDF(searchedBooking)}
+                  disabled={isDownloadingPdf}
+                  className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold rounded-xl flex items-center space-x-2 shadow-lg shadow-orange-600/30 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>{isDownloadingPdf ? 'Generating PDF...' : 'Download Pass (PDF)'}</span>
+                </button>
+
                 <button
                   onClick={() => handlePrintPass(searchedBooking)}
                   className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white text-xs font-bold rounded-xl flex items-center space-x-2 shadow-sm transition-all cursor-pointer hover:border-orange-500/40"
