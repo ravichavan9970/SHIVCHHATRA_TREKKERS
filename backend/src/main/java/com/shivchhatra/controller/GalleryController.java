@@ -34,12 +34,35 @@ public class GalleryController {
         return ResponseEntity.ok(saved);
     }
 
+    @PutMapping("/admin/gallery/{id}")
+    public ResponseEntity<?> updateGalleryImage(@PathVariable String id, @RequestBody GalleryImage item) {
+        return galleryImageRepository.findById(id).map(existing -> {
+            if (item.getImageUrl() != null && !item.getImageUrl().trim().isEmpty()) {
+                existing.setImageUrl(item.getImageUrl().trim());
+            }
+            if (item.getCaption() != null) {
+                existing.setCaption(item.getCaption().trim());
+            }
+            if (item.getLocation() != null) {
+                existing.setLocation(item.getLocation().trim());
+            }
+            GalleryImage saved = galleryImageRepository.save(existing);
+            return ResponseEntity.ok(saved);
+        }).orElseGet(() -> {
+            item.setId(id);
+            if (item.getCreatedAt() == null) {
+                item.setCreatedAt(Instant.now().toString());
+            }
+            GalleryImage saved = galleryImageRepository.save(item);
+            return ResponseEntity.ok(saved);
+        });
+    }
+
     @DeleteMapping("/admin/gallery/{id}")
     public ResponseEntity<?> deleteGalleryImage(@PathVariable String id) {
         if (galleryImageRepository.existsById(id)) {
             galleryImageRepository.deleteById(id);
-            return ResponseEntity.ok(Map.of("success", true));
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(Map.of("success", true, "id", id));
     }
 }

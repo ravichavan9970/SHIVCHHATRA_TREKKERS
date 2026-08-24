@@ -576,6 +576,13 @@ export async function createAdminGalleryPhoto(photo) {
   });
 }
 
+export async function updateAdminGalleryPhoto(id, photo) {
+  return fetchWithAuth(`/admin/gallery/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(photo)
+  });
+}
+
 export async function deleteAdminGalleryPhoto(id) {
   return fetchWithAuth(`/admin/gallery/${id}`, {
     method: 'DELETE'
