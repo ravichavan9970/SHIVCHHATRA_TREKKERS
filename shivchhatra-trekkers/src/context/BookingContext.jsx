@@ -2,24 +2,47 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { submitLiveBooking, trackLiveBooking } from '../services/apiService';
 
 const STORAGE_KEY = 'shivchhatra_bookings_v4';
+const PERMANENT_ARCHIVE_KEY = 'shivchhatra_bookings_permanent_archive';
 
-const initialDemoBookings = [];
+const recoverAllStoredBookings = () => {
+  const allMap = new Map();
+  const keysToProbe = [
+    PERMANENT_ARCHIVE_KEY,
+    STORAGE_KEY,
+    'shivchhatra_admin_bookings_cache',
+    'shivchhatra_bookings_v3',
+    'shivchhatra_bookings_v2',
+    'shivchhatra_bookings_data_v1',
+    'shivchhatra_bookings_backup'
+  ];
+
+  for (const key of keysToProbe) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(item => {
+            if (item && (item.id || item.utrNumber)) {
+              const uniqueKey = item.id || item.utrNumber;
+              if (!allMap.has(uniqueKey)) {
+                allMap.set(uniqueKey, item);
+              }
+            }
+          });
+        }
+      }
+    } catch (e) {
+      // Ignore individual corrupted keys
+    }
+  }
+  return Array.from(allMap.values());
+};
 
 const BookingContext = createContext();
 
 export function BookingProvider({ children }) {
-  const [bookings, setBookings] = useState(() => {
-    try {
-      localStorage.removeItem('shivchhatra_bookings_data_v1');
-      localStorage.removeItem('shivchhatra_bookings_v2');
-      localStorage.removeItem('shivchhatra_bookings_v3');
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : initialDemoBookings;
-    } catch (e) {
-      console.error("Failed to load bookings", e);
-      return initialDemoBookings;
-    }
-  });
+  const [bookings, setBookings] = useState(() => recoverAllStoredBookings());
 
   // Modal active states
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -32,6 +55,8 @@ export function BookingProvider({ children }) {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+      localStorage.setItem(PERMANENT_ARCHIVE_KEY, JSON.stringify(bookings));
+      localStorage.setItem('shivchhatra_bookings_backup', JSON.stringify(bookings));
     } catch (e) {
       console.error("Failed to save bookings", e);
     }

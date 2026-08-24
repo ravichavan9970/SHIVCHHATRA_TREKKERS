@@ -28,9 +28,47 @@ import {
 } from 'lucide-react';
 import { fetchAdminBookings, verifyAdminBooking, rejectAdminBooking, completeAdminBooking, deleteAdminBooking } from '../../services/api';
 
+const ADMIN_STORAGE_KEY = 'shivchhatra_admin_bookings_cache';
+const PERMANENT_ARCHIVE_KEY = 'shivchhatra_bookings_permanent_archive';
+
+const recoverAllStoredBookings = () => {
+  const allMap = new Map();
+  const keysToProbe = [
+    ADMIN_STORAGE_KEY,
+    PERMANENT_ARCHIVE_KEY,
+    'shivchhatra_bookings_v4',
+    'shivchhatra_bookings_v3',
+    'shivchhatra_bookings_v2',
+    'shivchhatra_bookings_data_v1',
+    'shivchhatra_bookings_backup'
+  ];
+
+  for (const key of keysToProbe) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(item => {
+            if (item && (item.id || item.utrNumber)) {
+              const uniqueKey = item.id || item.utrNumber;
+              if (!allMap.has(uniqueKey)) {
+                allMap.set(uniqueKey, item);
+              }
+            }
+          });
+        }
+      }
+    } catch (e) {
+      // Ignore individual corrupted keys
+    }
+  }
+  return Array.from(allMap.values());
+};
+
 export default function BookingsAuditor() {
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState(() => recoverAllStoredBookings());
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [notice, setNotice] = useState('');
@@ -40,10 +78,37 @@ export default function BookingsAuditor() {
     try {
       setLoading(true);
       const data = await fetchAdminBookings();
-      setBookings(data || []);
+      if (Array.isArray(data)) {
+        // Merge server data with local archive to guarantee zero data loss
+        const mergedMap = new Map();
+        // Server records take priority for updated status
+        data.forEach(item => {
+          if (item && (item.id || item.utrNumber)) {
+            mergedMap.set(item.id || item.utrNumber, item);
+          }
+        });
+        // Keep any existing cached local records that might not be on server yet
+        const cached = recoverAllStoredBookings();
+        cached.forEach(item => {
+          const key = item.id || item.utrNumber;
+          if (key && !mergedMap.has(key)) {
+            mergedMap.set(key, item);
+          }
+        });
+
+        const mergedList = Array.from(mergedMap.values());
+        setBookings(mergedList);
+
+        try {
+          localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(mergedList));
+          localStorage.setItem(PERMANENT_ARCHIVE_KEY, JSON.stringify(mergedList));
+        } catch (e) {
+          console.warn('Storage save notice:', e);
+        }
+      }
       setLoading(false);
     } catch (err) {
-      console.error(err);
+      console.warn('Server offline or waking up, preserved local cache:', err);
       setLoading(false);
     }
   };
