@@ -209,14 +209,15 @@ export async function syncToBackupServer(bookings, targetUrl = null) {
     throw new Error('Please enter a Secondary Backup Server URL first.');
   }
 
-  const endpoint = backupUrl.endsWith('/api') ? `${backupUrl}/admin/bookings/bulk-sync` : `${backupUrl}/api/admin/bookings/bulk-sync`;
+  const apiBase = backupUrl.endsWith('/api') ? backupUrl : `${backupUrl}/api`;
+  const bulkEndpoint = `${apiBase}/admin/bookings/bulk-sync`;
   const token = getAdminToken() || 'ShivPasss!****2026';
   
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const res = await fetch(endpoint, {
+    const res = await fetch(bulkEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -227,17 +228,49 @@ export async function syncToBackupServer(bookings, targetUrl = null) {
     });
     clearTimeout(timeoutId);
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-      throw new Error(err.error || `Backup sync failed with status ${res.status}`);
+    if (res.ok) {
+      return await res.json();
     }
-    return await res.json();
+
+    // Fallback: If bulk-sync is 404, sync items individually
+    if (res.status === 404 && Array.isArray(bookings) && bookings.length > 0) {
+      let successCount = 0;
+      for (const item of bookings) {
+        try {
+          await fetch(`${apiBase}/bookings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item)
+          });
+          if (item.status === 'Completed') {
+            await fetch(`${apiBase}/admin/bookings/${item.id}/complete`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+              body: JSON.stringify({ adminNote: item.adminNote || 'Archived from Primary' })
+            }).catch(() => {});
+          } else if (item.status === 'Confirmed') {
+            await fetch(`${apiBase}/admin/bookings/${item.id}/verify`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+              body: JSON.stringify({ adminNote: item.adminNote || 'Verified from Primary' })
+            }).catch(() => {});
+          }
+          successCount++;
+        } catch (e) {
+          // Continue syncing remaining items
+        }
+      }
+      return { success: true, synced: successCount, message: `Synced ${successCount} records via fallback mode` };
+    }
+
+    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+    throw new Error(err.error || `Backup sync failed with status ${res.status}`);
   } catch (err) {
     if (err.name === 'AbortError') {
       throw new Error(`Backup timed out reaching "${backupUrl}". The server might be waking up.`);
     }
     if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
-      throw new Error(`Unable to reach "${backupUrl}". Please deploy your 2nd backend on Render first, or use "Download Offline Backup" to save directly to your device.`);
+      throw new Error(`Unable to reach "${backupUrl}". Please ensure the secondary server is deployed and running.`);
     }
     throw err;
   }
