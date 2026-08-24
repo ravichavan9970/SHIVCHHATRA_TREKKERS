@@ -22,32 +22,62 @@ import { getLiveBookingStats } from '../../services/apiService';
 export default function HeroSection({ onExploreClick }) {
   const { treks, searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, categories } = useTreks();
   const { bookings } = useBookings();
-  const { stats, openReviewModal } = useReviews();
   const [liveCompletedTrekkers, setLiveCompletedTrekkers] = useState(null);
+
+  const recoverLocalTrekkersCount = () => {
+    const keys = [
+      'shivchhatra_bookings_permanent_archive',
+      'shivchhatra_admin_bookings_cache',
+      'shivchhatra_bookings_v4',
+      'shivchhatra_bookings_backup'
+    ];
+    let maxFound = 0;
+    for (const k of keys) {
+      try {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list)) {
+            const count = list
+              .filter(b => b && (b.status === 'Completed' || b.status === 'Confirmed'))
+              .reduce((sum, b) => sum + (Number(b.participantsCount) || 1), 0);
+            if (count > maxFound) maxFound = count;
+          }
+        }
+      } catch (e) {}
+    }
+    return maxFound;
+  };
 
   useEffect(() => {
     let isMounted = true;
     const fetchStats = async () => {
-      const data = await getLiveBookingStats();
-      if (isMounted && data && typeof data.completedTrekkers === 'number') {
-        setLiveCompletedTrekkers(data.completedTrekkers);
-      }
+      try {
+        const data = await getLiveBookingStats();
+        if (isMounted && data) {
+          const count = (typeof data.completedTrekkers === 'number' && data.completedTrekkers > 0)
+            ? data.completedTrekkers
+            : ((typeof data.verifiedTrekkers === 'number') ? data.verifiedTrekkers : 0);
+          setLiveCompletedTrekkers(count);
+        }
+      } catch (e) {}
     };
     fetchStats();
-    const interval = setInterval(fetchStats, 8000);
+    const interval = setInterval(fetchStats, 5000);
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
   }, []);
 
-  // Count completed/verified trekkers from live server database + local completed bookings
+  // Count completed/verified trekkers from live server database + local completed bookings + permanent vault
   const localCompletedCount = bookings
-    .filter(b => b.status === 'Completed' || b.status === 'Confirmed')
+    .filter(b => b && (b.status === 'Completed' || b.status === 'Confirmed'))
     .reduce((sum, b) => sum + (Number(b.participantsCount) || 1), 0);
 
+  const vaultCount = recoverLocalTrekkersCount();
   const serverCount = (liveCompletedTrekkers !== null && liveCompletedTrekkers !== undefined) ? liveCompletedTrekkers : 0;
-  const totalTrekkersCount = Math.max(serverCount, localCompletedCount);
+  const totalTrekkersCount = Math.max(serverCount, localCompletedCount, vaultCount);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

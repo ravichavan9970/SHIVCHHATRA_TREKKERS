@@ -276,6 +276,10 @@ export default function BookingsAuditor() {
         } catch (e) {
           console.warn('Storage save notice:', e);
         }
+
+        if (mergedList.length > data.length) {
+          bulkSyncPrimaryServer(mergedList).catch(e => console.warn('Auto primary sync notice:', e));
+        }
       }
       setLoading(false);
     } catch (err) {
