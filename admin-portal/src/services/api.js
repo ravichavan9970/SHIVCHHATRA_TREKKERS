@@ -170,53 +170,116 @@ export async function bulkSyncPrimaryServer(bookings) {
   });
 }
 
+export async function testBackupServerConnection(targetUrl = null) {
+  const backupUrl = (targetUrl || getBackupApiBase() || '').trim().replace(/\/+$/, '');
+  if (!backupUrl) {
+    throw new Error('Please enter a Secondary Backup Server URL.');
+  }
+
+  const endpoint = backupUrl.endsWith('/api') ? `${backupUrl}/health` : `${backupUrl}/api/health`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'GET',
+      signal: controller.signal
+    }).catch(async () => {
+      const fallbackEndpoint = backupUrl.endsWith('/api') ? `${backupUrl}/treks` : `${backupUrl}/api/treks`;
+      return fetch(fallbackEndpoint, { method: 'GET', signal: controller.signal });
+    });
+    clearTimeout(timeoutId);
+
+    if (!res || (!res.ok && res.status >= 500)) {
+      throw new Error(`Server returned HTTP ${res ? res.status : 'Error'}`);
+    }
+    return { success: true, url: backupUrl };
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error(`Connection timed out reaching "${backupUrl}". Server may be waking up or offline.`);
+    }
+    throw new Error(`Cannot reach "${backupUrl}". Please verify the secondary service is deployed on Render.`);
+  }
+}
+
 export async function syncToBackupServer(bookings, targetUrl = null) {
   const backupUrl = (targetUrl || getBackupApiBase() || '').trim().replace(/\/+$/, '');
   if (!backupUrl) {
-    throw new Error('Secondary Backup Server URL is not configured.');
+    throw new Error('Please enter a Secondary Backup Server URL first.');
   }
 
   const endpoint = backupUrl.endsWith('/api') ? `${backupUrl}/admin/bookings/bulk-sync` : `${backupUrl}/api/admin/bookings/bulk-sync`;
   const token = getAdminToken() || 'ShivPasss!****2026';
   
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Admin-Token': token
-    },
-    body: JSON.stringify(bookings)
-  });
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-    throw new Error(err.error || `Backup sync failed with status ${res.status}`);
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Token': token
+      },
+      body: JSON.stringify(bookings),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new Error(err.error || `Backup sync failed with status ${res.status}`);
+    }
+    return await res.json();
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error(`Backup timed out reaching "${backupUrl}". The server might be waking up.`);
+    }
+    if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
+      throw new Error(`Unable to reach "${backupUrl}". Please deploy your 2nd backend on Render first, or use "Download Offline Backup" to save directly to your device.`);
+    }
+    throw err;
   }
-  return await res.json();
 }
 
 export async function restoreFromBackupServer(targetUrl = null) {
   const backupUrl = (targetUrl || getBackupApiBase() || '').trim().replace(/\/+$/, '');
   if (!backupUrl) {
-    throw new Error('Secondary Backup Server URL is not configured.');
+    throw new Error('Please enter a Secondary Backup Server URL first.');
   }
 
   const endpoint = backupUrl.endsWith('/api') ? `${backupUrl}/admin/bookings` : `${backupUrl}/api/admin/bookings`;
   const token = getAdminToken() || 'ShivPasss!****2026';
 
-  const res = await fetch(endpoint, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Admin-Token': token
-    }
-  });
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-    throw new Error(err.error || `Restore failed with status ${res.status}`);
+    const res = await fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Token': token
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new Error(err.error || `Restore failed with status ${res.status}`);
+    }
+    return await res.json();
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error(`Restore request timed out reaching "${backupUrl}". The server might be waking up.`);
+    }
+    if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
+      throw new Error(`Unable to connect to "${backupUrl}". Please ensure the secondary service is running.`);
+    }
+    throw err;
   }
-  return await res.json();
 }
 
 export async function exportFullSystemBackup() {

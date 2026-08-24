@@ -45,7 +45,8 @@ import {
   setBackupApiBase,
   syncToBackupServer,
   restoreFromBackupServer,
-  bulkSyncPrimaryServer
+  bulkSyncPrimaryServer,
+  testBackupServerConnection
 } from '../../services/api';
 
 const ADMIN_STORAGE_KEY = 'shivchhatra_admin_bookings_cache';
@@ -98,6 +99,7 @@ export default function BookingsAuditor() {
   const [backupUrl, setBackupUrl] = useState(() => getBackupApiBase());
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
   const [showBackupConsole, setShowBackupConsole] = useState(false);
   const [backupSavedNotice, setBackupSavedNotice] = useState(false);
   const fileInputRef = useRef(null);
@@ -109,9 +111,38 @@ export default function BookingsAuditor() {
     setTimeout(() => setBackupSavedNotice(false), 3000);
   };
 
+  const handleTestBackupUrl = async () => {
+    if (!backupUrl.trim()) {
+      alert('Please enter a Secondary Backup Server URL to test (e.g. your 2nd Render web service URL).');
+      return;
+    }
+    try {
+      setIsTesting(true);
+      await testBackupServerConnection(backupUrl);
+      setIsTesting(false);
+      setNotice(`✅ Connected! Secondary backup server is active and reachable.`);
+      setTimeout(() => setNotice(''), 5000);
+    } catch (err) {
+      setIsTesting(false);
+      alert(err.message);
+    }
+  };
+
+  const handleCreateLocalVaultSnapshot = () => {
+    try {
+      localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(bookings));
+      localStorage.setItem(PERMANENT_ARCHIVE_KEY, JSON.stringify(bookings));
+      localStorage.setItem('shivchhatra_bookings_backup', JSON.stringify(bookings));
+      setNotice(`💾 Disaster Recovery Snapshot locked in local vault (${bookings.length} records safely saved).`);
+      setTimeout(() => setNotice(''), 5000);
+    } catch (e) {
+      alert('Failed to save snapshot: ' + e.message);
+    }
+  };
+
   const handlePushToBackupServer = async () => {
     if (!backupUrl.trim()) {
-      alert('Please enter your Secondary Backup Server URL first.');
+      alert('Please enter your Secondary Backup Server URL first (e.g. https://shivchhatra-backup.onrender.com/api). If you do not have a 2nd server deployed, you can use "Download Offline Backup" to save directly to your device.');
       return;
     }
     try {
@@ -122,7 +153,7 @@ export default function BookingsAuditor() {
       setTimeout(() => setNotice(''), 6000);
     } catch (err) {
       setIsBackingUp(false);
-      alert('Backup to secondary server failed: ' + err.message);
+      alert(err.message);
     }
   };
 
@@ -416,7 +447,7 @@ export default function BookingsAuditor() {
               <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
                 <span className="flex items-center space-x-1.5">
                   <Server className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Secondary Cloud Backup Server URL (Render / Cloud Backend)</span>
+                  <span>Secondary Cloud Backup Server URL (Optional 2nd Render Backend)</span>
                 </span>
                 {backupSavedNotice && (
                   <span className="text-emerald-400 text-[11px] flex items-center space-x-1">
@@ -425,34 +456,48 @@ export default function BookingsAuditor() {
                   </span>
                 )}
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="url"
                   value={backupUrl}
                   onChange={(e) => setBackupUrl(e.target.value)}
-                  placeholder="https://shivchhatra-backup.onrender.com/api"
+                  placeholder="e.g. https://your-second-backend.onrender.com/api"
                   className="flex-1 px-3.5 py-2.5 bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl text-white text-xs font-mono placeholder-slate-600 focus:outline-none"
                 />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors cursor-pointer"
-                >
-                  Save URL
-                </button>
+                <div className="flex items-center space-x-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleTestBackupUrl}
+                    disabled={isTesting}
+                    className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 transition-colors cursor-pointer flex items-center space-x-1"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin' : ''}`} />
+                    <span>{isTesting ? 'Testing...' : 'Test Connection'}</span>
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-950/40 transition-colors cursor-pointer"
+                  >
+                    Save URL
+                  </button>
+                </div>
               </div>
+              <p className="text-[10px] text-slate-500">
+                💡 Tip: If you haven't deployed a 2nd Render server yet, use <strong>Download Offline Backup</strong> or <strong>Lock Snapshot</strong> below to protect your payment history instantly!
+              </p>
             </form>
 
             {/* Recovery & Sync Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 pt-2">
               {/* Push to Secondary Cloud Server */}
               <button
                 type="button"
                 onClick={handlePushToBackupServer}
                 disabled={isBackingUp}
-                className="p-3 rounded-xl bg-orange-600/15 hover:bg-orange-600/25 border border-orange-500/40 text-orange-300 font-semibold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
+                className="p-3 rounded-xl bg-orange-600/15 hover:bg-orange-600/25 border border-orange-500/40 text-orange-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer disabled:opacity-50"
               >
                 <CloudUpload className={`w-4 h-4 text-orange-400 ${isBackingUp ? 'animate-bounce' : ''}`} />
-                <span>{isBackingUp ? 'Pushing Cloud Backup...' : 'Push to Secondary Server'}</span>
+                <span>{isBackingUp ? 'Pushing...' : 'Push to 2nd Cloud'}</span>
               </button>
 
               {/* Restore from Secondary Cloud Server */}
@@ -460,27 +505,37 @@ export default function BookingsAuditor() {
                 type="button"
                 onClick={handleRestoreFromBackupServer}
                 disabled={isRestoring}
-                className="p-3 rounded-xl bg-cyan-950/30 hover:bg-cyan-950/50 border border-cyan-500/40 text-cyan-300 font-semibold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
+                className="p-3 rounded-xl bg-cyan-950/30 hover:bg-cyan-950/50 border border-cyan-500/40 text-cyan-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer disabled:opacity-50"
               >
                 <CloudDownload className={`w-4 h-4 text-cyan-400 ${isRestoring ? 'animate-spin' : ''}`} />
-                <span>{isRestoring ? 'Restoring from Cloud...' : 'Restore from Secondary Server'}</span>
+                <span>{isRestoring ? 'Restoring...' : 'Restore from 2nd Cloud'}</span>
+              </button>
+
+              {/* Lock Snapshot to Local Vault */}
+              <button
+                type="button"
+                onClick={handleCreateLocalVaultSnapshot}
+                className="p-3 rounded-xl bg-amber-950/30 hover:bg-amber-950/50 border border-amber-500/40 text-amber-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+              >
+                <HardDrive className="w-4 h-4 text-amber-400" />
+                <span>Lock Local Snapshot</span>
               </button>
 
               {/* Download Offline JSON Snapshot */}
               <button
                 type="button"
                 onClick={handleExportJsonBackup}
-                className="p-3 rounded-xl bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 font-semibold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer"
+                className="p-3 rounded-xl bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
               >
                 <Download className="w-4 h-4 text-emerald-400" />
-                <span>Download Offline Backup</span>
+                <span>Download Offline File</span>
               </button>
 
               {/* Upload & Restore Offline JSON Snapshot */}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-3 rounded-xl bg-purple-950/30 hover:bg-purple-950/50 border border-purple-500/40 text-purple-300 font-semibold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer"
+                className="p-3 rounded-xl bg-purple-950/30 hover:bg-purple-950/50 border border-purple-500/40 text-purple-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
               >
                 <Upload className="w-4 h-4 text-purple-400" />
                 <span>Import Backup File</span>
