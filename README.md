@@ -1,76 +1,100 @@
 # 🚩 Shivchhatra Trekkers (शिवछत्र ट्रेकर्स)
-### Enterprise Sahyadri Adventure & Heritage Fort Expeditions Platform
+### Enterprise Sahyadri Adventure, Heritage Fort Expeditions & Disaster Recovery Platform
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.3-brightgreen.svg?logo=springboot)](https://spring.io/projects/spring-boot)
 [![Java 21](https://img.shields.io/badge/Java-21%20LTS-orange.svg?logo=openjdk)](https://openjdk.org/)
 [![React](https://img.shields.io/badge/React-19.0-blue.svg?logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8.0-purple.svg?logo=vite)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC.svg?logo=tailwind-css)](https://tailwindcss.com/)
-[![Database](https://img.shields.io/badge/Database-H2%20File%20Persistence-yellow.svg)](http://www.h2database.com)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Stage-2496ED.svg?logo=docker)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > *"Every stone in the Sahyadris echoes with the courage of Hindavi Swarajya."*  
-> **Shivchhatra Trekkers** is a full-stack, enterprise-grade expedition booking, heritage guide, and operations management platform designed for Sahyadri trekking organizers, fortress heritage enthusiasts, and adventure communities.
+> **Shivchhatra Trekkers** is a full-stack, enterprise-grade expedition booking, fortress heritage encyclopedic guide, operations auditor, and dual-cloud disaster recovery platform designed for Sahyadri trekking organizers, fortress heritage enthusiasts, and adventure communities.
 
 ---
 
 ## 🏛️ System Architecture
 
 ```mermaid
-graph TD
-    User["🌐 Trekker (Public Web App) <br> Port 5173"] -->|REST / Polling / UTR Submission| Backend["☕ Spring Boot 3 Backend <br> Port 8080"]
-    Admin["🛡️ Expedition Lead (Admin Console) <br> Port 5174"] -->|Full CRUD / Verifications| Backend
-    Backend -->|Spring Data JPA| DB[("💾 H2 Disk Database <br> ./data/shivchhatradb")]
+flowchart TD
+    subgraph Client Layer
+        Web["🌐 Trekker Public App (React 19 / Vite)<br>Vercel Production"]
+        Admin["🛡️ Admin Operations Command Center<br>Vercel Production"]
+    end
+
+    subgraph Primary Cloud Layer
+        PrimaryAPI["☕ Primary Cloud Backend (Spring Boot 3 / Java 21)<br>Render Web Service"]
+        PrimaryDB[("💾 Primary JPA Database Engine<br>H2 Persistent Disk Mode")]
+    end
+
+    subgraph Disaster Recovery & Secondary Cloud Layer
+        SecondaryAPI["☁️ Secondary Backup Server (Spring Boot 3)<br>Render Replica Web Service"]
+        SecondaryDB[("💾 Secondary Mirror Database")]
+        Vault["🗄️ Browser Local Vault & Offline JSON Snapshots"]
+    end
+
+    Web -->|REST / Polling / UTR Submission| PrimaryAPI
+    Admin -->|Full Operations / Verifications| PrimaryAPI
+    PrimaryAPI <--> PrimaryDB
+
+    Admin -.->|1-Click Full System Push / Pull| SecondaryAPI
+    SecondaryAPI <--> SecondaryDB
+    Admin <-->|Auto Reconciliation & Offline Backup| Vault
 ```
 
 ---
 
-## ✨ Key Features
+## ✨ Core Platform Modules
 
-### 1. 🌐 Public Trekker Web Application (`http://localhost:5173`)
-- **Interactive Hero & Expedition Discovery**: Filter Sahyadri treks by Category (*Heritage, Monsoon, Night Trek, Thrill*), Difficulty (*Easy, Moderate, Hard*), Region, and Budget slider.
-- **Batch Schedule & Seat Counters**: Real-time batch dates, seat availability trackers, pickup locations (Pune / Mumbai / Nashik).
-- **Shivkalin Sacred Forts Heritage**: Interactive showcase and dedicated encyclopedic guide covering 9 iconic Maratha forts (*Rajgad, Raigad, Torna, Harishchandragad, Sinhagad, Harihar, Pratapgad, Panhala, Salher*).
+### 1. 🌐 Public Trekker Web Application
+- **Interactive Expedition Discovery**: Filter Sahyadri treks by Category (*Heritage, Monsoon, Night Trek, Thrill*), Difficulty (*Easy, Moderate, Hard*), Region, and Budget.
+- **Batch Schedule & Capacity Trackers**: Real-time batch dates, seat availability trackers, pickup locations (Pune / Mumbai / Nashik).
+- **Shivkalin Sacred Forts Heritage Guide**: Interactive encyclopedic showcase covering iconic Maratha forts (*Rajgad, Raigad, Torna, Harishchandragad, Sinhagad, Harihar, Pratapgad, Panhala, Salher*).
 - **Direct UPI QR Instant Booking**:
-  - Auto-generated dynamic UPI QR codes and official Merchant Scanner for **`7447661921@hdfc`** (Ravindra Chavan).
-  - 12-digit UTR bank reference verification with receipt upload validator.
+  - Auto-generated dynamic UPI QR codes and official Merchant Scanner.
+  - 12-digit UTR bank reference verification with receipt image upload validator.
   - Multi-passenger squad registration with emergency contact & pickup coordinates.
 - **Live Boarding Pass & Expedition Tracker (`/track`)**:
   - Query by Booking Reference ID (`ST-2026-XXXX`), Phone Number, or 12-digit UTR.
-  - Real-time 3-second status polling (updates live to 🟢 **Payment Verified & Confirmed** when admin approves).
+  - Real-time status polling (updates live to 🟢 **Payment Verified & Confirmed** upon admin approval).
   - One-click **Printable Boarding Pass** and WhatsApp Expedition Lead integration.
-- **Certified Safety & Gear Checklist**: Interactive gear packing checker and safety protocols.
+- **Unfiltered Trail Moments Gallery**: High-resolution trail moments, summit views, and camping captures.
 - **Community Ratings & Review Modal**: Trekker verified reviews, 5-star ratings, and aggregated score badges.
 
 ---
 
-### 2. 🛡️ Standalone Admin Command Hub (`http://localhost:5174`)
-- **Treks Catalog Manager**:
+### 2. 🛡️ Standalone Admin Command Hub
+- **Treks & Batches Catalog Manager**:
   - Add, edit, archive, and delete treks.
   - Full batch date scheduler, pricing configurator, elevation/duration editor, and photo manager.
 - **Bookings & Payments Auditor**:
   - View all incoming expedition registrations and payment receipts.
-  - 1-click **Verify Booking** (confirms seat and notifies public pass tracker) or **Reject** (frees up batch seats).
+  - 1-click **Verify Booking** (confirms seat and notifies public pass tracker) or **Reject** (frees up batch capacity).
+  - **🚩 Expedition Completed Action**: Safely archives summited adventurers into the permanent lifetime history vault with zero data loss.
   - Full passenger squad roster inspection and CSV/Print exports.
+- **🛡️ Enterprise Dual-Cloud Disaster Recovery Engine**:
+  - 🚀 **`Push Full System to 2nd Server`**: Replicates all 6 modules (Treks, Bookings, Reviews, Payment Configs, Forts, Gallery) to the secondary Render backend with one click.
+  - 🔄 **`Restore Full System from 2nd Server`**: 1-click cloud-to-cloud restoration.
+  - 🗄️ **`Lock Full Snapshot`**: Instant offline local browser vault lock.
+  - 💾 **`Export Full Backup (.json)`**: Downloads a complete timestamped backup snapshot to your computer/phone.
+  - 📥 **`Import Full System File`**: 1-click restoration from any JSON backup file.
+- **Unfiltered Trail Moments Gallery Manager**:
+  - Upload photos, edit captions & fort locations with the **✏️ Edit Info Modal**, and manage trail moments.
 - **Sacred Forts Heritage Manager**:
   - Edit Marathi titles, historical narratives, battle lore quotes, elevations, and bastions.
-  - Add new forts or modify existing ones with real-time public synchronization.
 - **Payment Gateway Configurator**:
-  - Live UPI ID management (`7447661921@hdfc`), Account Holder, Bank Name, and Custom QR scanner uploader.
-  - Promo code discounts system (*SWARAJYA10, GROUPTREK*).
-- **Trail Moments Photo Gallery Manager**:
-  - Upload genuine trekker photos, add captions, tag Sahyadri locations, and publish instantly.
-- **Community Reviews Moderator**:
-  - Live rating metric breakdown (5★ to 1★), delete spam, and moderate feedback.
+  - Live merchant UPI ID, Account Holder, Bank details, and Custom QR scanner management.
 
 ---
 
-### 3. ☕ Spring Boot Enterprise Backend (`http://localhost:8080`)
+### 3. ☕ Spring Boot Enterprise Backend
 - Built on **Java 21 LTS** and **Spring Boot 3.3.3**.
-- **Spring Data JPA & Hibernate 6** with disk-persisted **H2 Database** (`./data/shivchhatradb`).
+- **Spring Data JPA & Hibernate 6** with disk-persisted database storage.
 - `@Lob CLOB` support for handling up to 50MB base64 images and large file payloads.
-- RESTful API endpoints for Treks, Bookings, Forts, Gallery, Reviews, and Payment Settings.
-- Embedded **H2 Web Console** (`/h2-console`) for direct SQL inspection.
+- High-precedence CORS configuration supporting multi-domain production environments.
+- High-capacity rate limiting for cellular network pools (600 req/min).
+- Atomic bulk sync endpoints (`/api/admin/system/full-export`, `/api/admin/system/full-import`, `/api/admin/bookings/bulk-sync`).
 
 ---
 
@@ -79,10 +103,11 @@ graph TD
 | Layer | Technologies |
 |---|---|
 | **Frontend (Public Client)** | React 19, Vite 8, Tailwind CSS, Framer Motion, Lucide React |
-| **Frontend (Admin Portal)** | React 19, Vite 8, Tailwind CSS, Lucide React |
-| **Backend API** | Java 21, Spring Boot 3.3.3, Spring Web, Spring Data JPA |
+| **Frontend (Admin Portal)** | React 19, Vite 8, Tailwind CSS, Framer Motion, Lucide React |
+| **Backend API** | Java 21, Spring Boot 3.3.3, Spring Data JPA, Hibernate, Maven |
 | **Database & ORM** | H2 Embedded Database (Disk Mode), Hibernate ORM |
-| **Build & Tooling** | Apache Maven 3.9+, Node.js 18+, npm |
+| **Containerization & CI/CD** | Multi-Stage Dockerfile, Eclipse Temurin 21 JRE, Git |
+| **Deployment Targets** | Vercel (Frontends) + Render (Primary & Secondary Web Services) |
 
 ---
 
@@ -92,67 +117,60 @@ graph TD
 shivchhatra-trekkers/
 ├── backend/                               # Spring Boot 3 Java 21 Backend
 │   ├── src/main/java/com/shivchhatra/
-│   │   ├── config/                        # CORS, WebConfig, DataInitializer
-│   │   ├── controller/                    # REST API Controllers (Trek, Booking, Fort, Gallery, etc.)
+│   │   ├── config/                        # CORS, WebConfig, RateLimiting
+│   │   ├── controller/                    # REST API (Trek, Booking, Fort, Gallery, SystemBackup)
 │   │   ├── model/                         # JPA Entities (Trek, Booking, FortHeritage, Review, etc.)
 │   │   └── repository/                    # Spring Data JPA Repositories
 │   ├── src/main/resources/
-│   │   └── application.properties         # Database, multipart, and server configs
-│   ├── data/                              # Persistent H2 database storage (gitignored)
+│   │   └── application.properties         # Server & JPA configs
+│   ├── data/                              # Persistent database storage (gitignored)
 │   └── pom.xml                            # Maven dependencies & build configuration
 │
-├── shivchhatra-trekkers/                  # Public Web Application (Port 5173)
+├── shivchhatra-trekkers/                  # Public Web Application
 │   ├── src/
 │   │   ├── components/                    # Home, Trek, Fort, Booking, Review components
-│   │   ├── context/                       # TrekContext, BookingContext, ReviewContext, PaymentConfigContext
-│   │   ├── data/                          # Fallback datasets (fortsGuide, initialTreks)
-│   │   ├── pages/                         # HomePage, TreksCatalog, FortGuide, BookingTrack, Safety
+│   │   ├── context/                       # TrekContext, BookingContext, ReviewContext
+│   │   ├── pages/                         # HomePage, TreksCatalog, FortGuide, BookingTrack
 │   │   ├── services/                      # apiService.js (REST client & server sync)
-│   │   ├── App.jsx                        # Routing & Global Modals
-│   │   └── main.jsx                       # Entrypoint with ErrorBoundary
+│   │   └── App.jsx                        # Routing & Global Modals
 │   ├── package.json
 │   └── vite.config.js
 │
-├── admin-portal/                          # Standalone Admin Command Hub (Port 5174)
+├── admin-portal/                          # Admin Command Hub
 │   ├── src/
-│   │   ├── components/admin/              # TrekManager, BookingManager, FortManager, GalleryManager, etc.
-│   │   ├── services/                      # api.js (Admin REST Client)
-│   │   ├── App.jsx                        # Tab navigation & Admin routing
-│   │   └── main.jsx
+│   │   ├── components/admin/              # TrekManager, BookingsAuditor, GalleryManager, etc.
+│   │   ├── services/                      # api.js (Disaster Recovery & Admin REST Client)
+│   │   └── App.jsx                        # Operations tabs & Admin security gate
 │   ├── package.json
 │   └── vite.config.js
 │
-├── .gitignore                             # Root git ignore rules
+├── Dockerfile                             # Root Multi-Stage Docker build for Render
 ├── package.json                           # Root scripts to build and run all services
 └── README.md                              # Enterprise project documentation
 ```
 
 ---
 
-## 🚀 Getting Started & Setup
+## 🚀 Getting Started & Local Setup
 
 ### 📋 Prerequisites
-Ensure the following tools are installed on your machine:
-- **Java 21 JDK** (Verify with `java -version`)
-- **Apache Maven** (Verify with `mvn -version`)
-- **Node.js 18+ and npm** (Verify with `node -v` and `npm -v`)
-- **Git** (Verify with `git --version`)
+- **Java 21 JDK** (`java -version`)
+- **Apache Maven 3.9+** (`mvn -version`)
+- **Node.js 18+ & npm** (`node -v` and `npm -v`)
+- **Git** (`git --version`)
 
 ---
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/your-username/shivchhatra-trekkers.git
-cd shivchhatra-trekkers
+git clone https://github.com/<your-username>/SHIVCHHATRA_TREKKERS.git
+cd SHIVCHHATRA_TREKKERS
 ```
 
 ---
 
 ### 2️⃣ Install Dependencies
 ```bash
-# Install root orchestration dependencies
-npm install
-
 # Install Public Client dependencies
 cd shivchhatra-trekkers && npm install && cd ..
 
@@ -162,13 +180,13 @@ cd admin-portal && npm install && cd ..
 
 ---
 
-### 3️⃣ Build & Start the Backend
+### 3️⃣ Start the Backend
 ```bash
 cd backend
 mvn clean package -DskipTests
 java -jar target/shivchhatra-backend-1.0.0.jar
 ```
-> The Java backend will start on **`http://localhost:8080`** and automatically seed default fort heritage records and payment configuration.
+> The Java backend will start on **`http://localhost:8080`** and initialize default records.
 
 ---
 
@@ -179,52 +197,67 @@ java -jar target/shivchhatra-backend-1.0.0.jar
 cd shivchhatra-trekkers
 npm run dev
 ```
-> Public Website will be live on **`http://localhost:5173`**
+> Public Website live on **`http://localhost:5173`**
 
 #### Terminal 2 — Admin Command Hub:
 ```bash
 cd admin-portal
 npm run dev
 ```
-> Admin Portal will be live on **`http://localhost:5174`**
+> Admin Portal live on **`http://localhost:5174`**
 
 ---
 
-## 🌐 Network Ports & Endpoints
+## ☁️ Production Deployment Guide
 
-| Service | URL | Purpose |
-|---|---|---|
-| **Public Website** | `http://localhost:5173` | Trek exploration, fort heritage, bookings, pass tracker |
-| **Admin Portal** | `http://localhost:5174` | Full management console (Treks, Bookings, Forts, Gallery, Reviews) |
-| **Spring Boot REST API** | `http://localhost:8080/api` | Enterprise REST endpoints |
-| **H2 Web Console** | `http://localhost:8080/h2-console` | Direct database SQL browser (`JDBC URL: jdbc:h2:file:./data/shivchhatradb`, `User: SA`, `Password: [empty]`) |
+### 🐳 Deploying Backend on Render (Primary & Secondary Services)
+1. In Render, select **New Web Service** -> Connect your GitHub repo.
+2. Set Environment to **Docker** (Render will use the root `Dockerfile`).
+3. Set **Environment Variables**:
+   - `PORT` = `8080`
+   - `JAVA_TOOL_OPTIONS` = `-Xmx450m`
+4. Set Web Service Name:
+   - Primary: `shivchhatra-trekkers-backend`
+   - Secondary Disaster Recovery: `shivchhatra-backup-server`
 
 ---
 
-## 🔐 Default Admin Credentials
-
-- **Username**: `admin`
-- **Password**: `shivchhatra@2026`
-- **Security Access Code**: `SHIVCHHATRA_ADMIN_SECURE_TOKEN_2026`
-
-*(You can update or configure these credentials in `backend/src/main/resources/application.properties`)*
+### ⚡ Deploying Frontends on Vercel
+1. **Public Portal (`shivchhatra-trekkers`)**:
+   - Root Directory: `shivchhatra-trekkers`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Environment Variables: `VITE_API_URL` = `https://<your-primary-backend>.onrender.com/api`
+2. **Admin Command Hub (`admin-portal`)**:
+   - Root Directory: `admin-portal`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Environment Variables: `VITE_API_URL` = `https://<your-primary-backend>.onrender.com/api`
 
 ---
 
 ## 📡 Core API Endpoints
 
-### 🏔️ Treks
+### 🏔️ Treks & Expeditions
 - `GET /api/treks` — Retrieve all active treks & batch dates
 - `POST /api/admin/treks` — Create a new trek expedition
 - `PUT /api/admin/treks/{id}` — Update trek information & batches
-- `DELETE /api/admin/treks/{id}` — Archive or delete a trek
+- `DELETE /api/admin/treks/{id}` — Delete a trek
 
 ### 🎫 Bookings & Pass Tracker
 - `GET /api/bookings/track?query={id_or_phone_or_utr}` — Query booking status & boarding pass
 - `POST /api/bookings` — Submit a new expedition booking
+- `GET /api/bookings/stats` — Real-time dynamic stats counter
 - `GET /api/admin/bookings` — List all customer bookings for auditor
 - `PUT /api/admin/bookings/{id}/verify` — Verify bank UTR & confirm booking
+- `PUT /api/admin/bookings/{id}/complete` — Mark completed & archive to lifetime history
 - `PUT /api/admin/bookings/{id}/reject` — Flag or reject invalid booking
+- `DELETE /api/admin/bookings/{id}` — Idempotent delete booking record
+- `POST /api/admin/bookings/bulk-sync` — Bulk reconcile bookings to database
+
+### 🛡️ Disaster Recovery & System Replication
+- `GET /api/admin/system/full-export` — Snapshot dump of all 6 platform modules
+- `POST /api/admin/system/full-import` — Atomic import & replication of full database snapshot
 
 ### 🏰 Fort Heritage
 - `GET /api/forts` — List all 9 sacred historical forts
@@ -232,29 +265,21 @@ npm run dev
 - `PUT /api/admin/forts/{id}` — Update fort history, elevation, or bastions
 - `DELETE /api/admin/forts/{id}` — Remove fort entry
 
-### 📸 Gallery & Reviews
+### 📸 Trail Moments Gallery
 - `GET /api/gallery` — Get live Trail Moments photos
 - `POST /api/admin/gallery` — Upload a new trail photo moment
+- `PUT /api/admin/gallery/{id}` — Edit photo caption, location, or image URL
 - `DELETE /api/admin/gallery/{id}` — Remove a gallery photo
+
+### ⭐ Trekker Reviews
 - `GET /api/reviews` — Get verified customer reviews
 - `POST /api/reviews` — Submit a review and rating
+- `DELETE /api/admin/reviews/{id}` — Delete a review
 
----
-
-## 📦 Production Build
-
-To produce optimized production builds for deployment:
-
-```bash
-# Build Java Backend JAR
-cd backend && mvn clean package -DskipTests && cd ..
-
-# Build Public Client static assets (to dist/)
-cd shivchhatra-trekkers && npm run build && cd ..
-
-# Build Admin Portal static assets (to dist/)
-cd admin-portal && npm run build && cd ..
-```
+### 🏦 Payment Configuration
+- `GET /api/payment-config` — Public merchant UPI & scanner config
+- `GET /api/admin/payment-config` — Admin gateway settings
+- `PUT /api/admin/payment-config` — Update merchant UPI & banking settings
 
 ---
 
