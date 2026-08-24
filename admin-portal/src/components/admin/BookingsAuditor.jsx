@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, 
@@ -24,9 +24,29 @@ import {
   Archive,
   Award,
   Sparkles,
-  Download
+  Download,
+  Upload,
+  CloudUpload,
+  CloudDownload,
+  Database,
+  Server,
+  HardDrive,
+  FileJson,
+  Layers,
+  Check
 } from 'lucide-react';
-import { fetchAdminBookings, verifyAdminBooking, rejectAdminBooking, completeAdminBooking, deleteAdminBooking } from '../../services/api';
+import { 
+  fetchAdminBookings, 
+  verifyAdminBooking, 
+  rejectAdminBooking, 
+  completeAdminBooking, 
+  deleteAdminBooking,
+  getBackupApiBase,
+  setBackupApiBase,
+  syncToBackupServer,
+  restoreFromBackupServer,
+  bulkSyncPrimaryServer
+} from '../../services/api';
 
 const ADMIN_STORAGE_KEY = 'shivchhatra_admin_bookings_cache';
 const PERMANENT_ARCHIVE_KEY = 'shivchhatra_bookings_permanent_archive';
@@ -74,20 +94,138 @@ export default function BookingsAuditor() {
   const [notice, setNotice] = useState('');
   const [activeTab, setActiveTab] = useState('active'); // 'active' | 'history' | 'all'
 
+  // Dual-Server Cloud Backup & Disaster Recovery State
+  const [backupUrl, setBackupUrl] = useState(() => getBackupApiBase());
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [showBackupConsole, setShowBackupConsole] = useState(false);
+  const [backupSavedNotice, setBackupSavedNotice] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleSaveBackupUrl = (e) => {
+    e.preventDefault();
+    setBackupApiBase(backupUrl);
+    setBackupSavedNotice(true);
+    setTimeout(() => setBackupSavedNotice(false), 3000);
+  };
+
+  const handlePushToBackupServer = async () => {
+    if (!backupUrl.trim()) {
+      alert('Please enter your Secondary Backup Server URL first.');
+      return;
+    }
+    try {
+      setIsBackingUp(true);
+      await syncToBackupServer(bookings, backupUrl);
+      setIsBackingUp(false);
+      setNotice(`🚀 Cloud Backup Success: Synchronized ${bookings.length} records to secondary server!`);
+      setTimeout(() => setNotice(''), 6000);
+    } catch (err) {
+      setIsBackingUp(false);
+      alert('Backup to secondary server failed: ' + err.message);
+    }
+  };
+
+  const handleRestoreFromBackupServer = async () => {
+    if (!backupUrl.trim()) {
+      alert('Please enter your Secondary Backup Server URL first.');
+      return;
+    }
+    if (window.confirm(`Pull and restore all historical bookings from secondary server (${backupUrl})?`)) {
+      try {
+        setIsRestoring(true);
+        const restoredData = await restoreFromBackupServer(backupUrl);
+        if (Array.isArray(restoredData) && restoredData.length > 0) {
+          const mergedMap = new Map();
+          bookings.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
+          restoredData.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
+          const mergedList = Array.from(mergedMap.values());
+
+          setBookings(mergedList);
+          localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(mergedList));
+          localStorage.setItem(PERMANENT_ARCHIVE_KEY, JSON.stringify(mergedList));
+
+          await bulkSyncPrimaryServer(mergedList).catch(e => console.warn("Primary bulk sync notice:", e));
+
+          setIsRestoring(false);
+          setNotice(`🔄 Disaster Recovery Success: Restored & synced ${restoredData.length} records!`);
+          setTimeout(() => setNotice(''), 6000);
+        } else {
+          setIsRestoring(false);
+          alert('Secondary server returned 0 records.');
+        }
+      } catch (err) {
+        setIsRestoring(false);
+        alert('Restore from secondary server failed: ' + err.message);
+      }
+    }
+  };
+
+  const handleExportJsonBackup = () => {
+    try {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(bookings, null, 2));
+      const downloadAnchor = document.createElement('a');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `shivchhatra_trekkers_backup_${dateStr}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      setNotice(`💾 Offline JSON backup downloaded successfully (${bookings.length} records)`);
+      setTimeout(() => setNotice(''), 5000);
+    } catch (e) {
+      alert("Failed to export backup: " + e.message);
+    }
+  };
+
+  const handleImportJsonBackup = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const content = event.target.result;
+        const parsed = JSON.parse(content);
+        const listToImport = Array.isArray(parsed) ? parsed : (parsed.bookings && Array.isArray(parsed.bookings) ? parsed.bookings : []);
+        
+        if (listToImport.length === 0) {
+          alert("No valid booking records found in this backup file.");
+          return;
+        }
+
+        const mergedMap = new Map();
+        bookings.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
+        listToImport.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
+        const mergedList = Array.from(mergedMap.values());
+
+        setBookings(mergedList);
+        localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(mergedList));
+        localStorage.setItem(PERMANENT_ARCHIVE_KEY, JSON.stringify(mergedList));
+
+        await bulkSyncPrimaryServer(mergedList).catch(e => console.warn("Primary bulk sync notice:", e));
+
+        setNotice(`📥 Successfully imported & restored ${listToImport.length} booking records!`);
+        setTimeout(() => setNotice(''), 6000);
+      } catch (err) {
+        alert("Failed to parse backup JSON file: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   const loadBookings = async () => {
     try {
       setLoading(true);
       const data = await fetchAdminBookings();
       if (Array.isArray(data)) {
-        // Merge server data with local archive to guarantee zero data loss
         const mergedMap = new Map();
-        // Server records take priority for updated status
         data.forEach(item => {
           if (item && (item.id || item.utrNumber)) {
             mergedMap.set(item.id || item.utrNumber, item);
           }
         });
-        // Keep any existing cached local records that might not be on server yet
         const cached = recoverAllStoredBookings();
         cached.forEach(item => {
           const key = item.id || item.utrNumber;
@@ -215,6 +353,18 @@ export default function BookingsAuditor() {
 
         <div className="flex items-center space-x-2">
           <button
+            onClick={() => setShowBackupConsole(!showBackupConsole)}
+            className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
+              showBackupConsole 
+                ? 'bg-orange-600 text-white border-orange-500 shadow-md shadow-orange-950/40' 
+                : 'bg-slate-900/90 hover:bg-slate-800 border-slate-800 text-orange-400'
+            }`}
+          >
+            <Database className="w-3.5 h-3.5" />
+            <span>Dual-Cloud Backup & Recovery</span>
+          </button>
+
+          <button
             onClick={loadBookings}
             className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition-colors flex items-center space-x-1.5 text-xs font-semibold cursor-pointer"
           >
@@ -223,6 +373,122 @@ export default function BookingsAuditor() {
           </button>
         </div>
       </div>
+
+      {/* Hidden File Input for JSON Backup Import */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleImportJsonBackup} 
+        accept=".json" 
+        className="hidden" 
+      />
+
+      {/* Enterprise Dual-Server Backup & Disaster Recovery Console */}
+      <AnimatePresence>
+        {showBackupConsole && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-slate-950/95 border border-orange-500/40 shadow-2xl space-y-4"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 rounded-xl bg-orange-600/20 text-orange-400 border border-orange-500/30">
+                  <HardDrive className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center space-x-2">
+                    <span>Enterprise Dual-Server Backup & Disaster Recovery</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold">
+                      Zero Data Loss
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-slate-400">
+                    Mirror, backup, and instantly restore all payment histories and completed expedition archives.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Secondary Backup Server URL Configuration */}
+            <form onSubmit={handleSaveBackupUrl} className="space-y-2">
+              <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                <span className="flex items-center space-x-1.5">
+                  <Server className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Secondary Cloud Backup Server URL (Render / Cloud Backend)</span>
+                </span>
+                {backupSavedNotice && (
+                  <span className="text-emerald-400 text-[11px] flex items-center space-x-1">
+                    <Check className="w-3 h-3" />
+                    <span>Saved!</span>
+                  </span>
+                )}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={backupUrl}
+                  onChange={(e) => setBackupUrl(e.target.value)}
+                  placeholder="https://shivchhatra-backup.onrender.com/api"
+                  className="flex-1 px-3.5 py-2.5 bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl text-white text-xs font-mono placeholder-slate-600 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors cursor-pointer"
+                >
+                  Save URL
+                </button>
+              </div>
+            </form>
+
+            {/* Recovery & Sync Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2">
+              {/* Push to Secondary Cloud Server */}
+              <button
+                type="button"
+                onClick={handlePushToBackupServer}
+                disabled={isBackingUp}
+                className="p-3 rounded-xl bg-orange-600/15 hover:bg-orange-600/25 border border-orange-500/40 text-orange-300 font-semibold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <CloudUpload className={`w-4 h-4 text-orange-400 ${isBackingUp ? 'animate-bounce' : ''}`} />
+                <span>{isBackingUp ? 'Pushing Cloud Backup...' : 'Push to Secondary Server'}</span>
+              </button>
+
+              {/* Restore from Secondary Cloud Server */}
+              <button
+                type="button"
+                onClick={handleRestoreFromBackupServer}
+                disabled={isRestoring}
+                className="p-3 rounded-xl bg-cyan-950/30 hover:bg-cyan-950/50 border border-cyan-500/40 text-cyan-300 font-semibold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <CloudDownload className={`w-4 h-4 text-cyan-400 ${isRestoring ? 'animate-spin' : ''}`} />
+                <span>{isRestoring ? 'Restoring from Cloud...' : 'Restore from Secondary Server'}</span>
+              </button>
+
+              {/* Download Offline JSON Snapshot */}
+              <button
+                type="button"
+                onClick={handleExportJsonBackup}
+                className="p-3 rounded-xl bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 font-semibold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer"
+              >
+                <Download className="w-4 h-4 text-emerald-400" />
+                <span>Download Offline Backup</span>
+              </button>
+
+              {/* Upload & Restore Offline JSON Snapshot */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="p-3 rounded-xl bg-purple-950/30 hover:bg-purple-950/50 border border-purple-500/40 text-purple-300 font-semibold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer"
+              >
+                <Upload className="w-4 h-4 text-purple-400" />
+                <span>Import Backup File</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">

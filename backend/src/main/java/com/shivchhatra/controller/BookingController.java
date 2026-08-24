@@ -217,4 +217,56 @@ public class BookingController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/admin/bookings/bulk-sync")
+    public ResponseEntity<?> bulkSyncBookings(@RequestBody List<Booking> incomingBookings) {
+        if (incomingBookings == null || incomingBookings.isEmpty()) {
+            return ResponseEntity.ok(Map.of("synced", 0, "message", "No bookings provided"));
+        }
+
+        int syncedCount = 0;
+        for (Booking incoming : incomingBookings) {
+            if (incoming == null || incoming.getId() == null) continue;
+            
+            Optional<Booking> existingOpt = bookingRepository.findById(incoming.getId());
+            if (existingOpt.isPresent()) {
+                Booking existing = existingOpt.get();
+                if (!"Completed".equalsIgnoreCase(existing.getStatus()) && 
+                    ("Completed".equalsIgnoreCase(incoming.getStatus()) || "Confirmed".equalsIgnoreCase(incoming.getStatus()))) {
+                    existing.setStatus(incoming.getStatus());
+                    existing.setVerifiedAt(incoming.getVerifiedAt());
+                    existing.setCompletedAt(incoming.getCompletedAt());
+                    existing.setAdminNote(incoming.getAdminNote());
+                    bookingRepository.save(existing);
+                    syncedCount++;
+                }
+            } else {
+                bookingRepository.save(incoming);
+                syncedCount++;
+            }
+        }
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("success", true);
+        resp.put("synced", syncedCount);
+        resp.put("total", bookingRepository.count());
+        resp.put("timestamp", Instant.now().toString());
+        return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/admin/bookings/export-backup")
+    public ResponseEntity<?> exportFullBackup() {
+        List<Booking> bookings = bookingRepository.findAllByOrderBySubmittedAtDesc();
+        List<Trek> treks = trekRepository.findAll();
+
+        Map<String, Object> backup = new HashMap<>();
+        backup.put("system", "Shivchhatra Trekkers Enterprise Disaster Recovery Archive");
+        backup.put("version", "2.0");
+        backup.put("exportedAt", Instant.now().toString());
+        backup.put("totalBookings", bookings.size());
+        backup.put("bookings", bookings);
+        backup.put("treks", treks);
+
+        return ResponseEntity.ok(backup);
+    }
 }

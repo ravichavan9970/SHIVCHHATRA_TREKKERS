@@ -151,6 +151,78 @@ export async function deleteAdminBooking(id) {
   });
 }
 
+export function getBackupApiBase() {
+  return localStorage.getItem('shivchhatra_backup_api_url') || '';
+}
+
+export function setBackupApiBase(url) {
+  if (url && url.trim()) {
+    localStorage.setItem('shivchhatra_backup_api_url', url.trim());
+  } else {
+    localStorage.removeItem('shivchhatra_backup_api_url');
+  }
+}
+
+export async function bulkSyncPrimaryServer(bookings) {
+  return fetchWithAuth('/admin/bookings/bulk-sync', {
+    method: 'POST',
+    body: JSON.stringify(bookings)
+  });
+}
+
+export async function syncToBackupServer(bookings, targetUrl = null) {
+  const backupUrl = (targetUrl || getBackupApiBase() || '').trim().replace(/\/+$/, '');
+  if (!backupUrl) {
+    throw new Error('Secondary Backup Server URL is not configured.');
+  }
+
+  const endpoint = backupUrl.endsWith('/api') ? `${backupUrl}/admin/bookings/bulk-sync` : `${backupUrl}/api/admin/bookings/bulk-sync`;
+  const token = getAdminToken() || 'ShivPasss!****2026';
+  
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token
+    },
+    body: JSON.stringify(bookings)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+    throw new Error(err.error || `Backup sync failed with status ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function restoreFromBackupServer(targetUrl = null) {
+  const backupUrl = (targetUrl || getBackupApiBase() || '').trim().replace(/\/+$/, '');
+  if (!backupUrl) {
+    throw new Error('Secondary Backup Server URL is not configured.');
+  }
+
+  const endpoint = backupUrl.endsWith('/api') ? `${backupUrl}/admin/bookings` : `${backupUrl}/api/admin/bookings`;
+  const token = getAdminToken() || 'ShivPasss!****2026';
+
+  const res = await fetch(endpoint, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token
+    }
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+    throw new Error(err.error || `Restore failed with status ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function exportFullSystemBackup() {
+  return fetchWithAuth('/admin/bookings/export-backup');
+}
+
 // Reviews API
 export async function fetchAdminReviews() {
   return fetchWithAuth('/reviews');

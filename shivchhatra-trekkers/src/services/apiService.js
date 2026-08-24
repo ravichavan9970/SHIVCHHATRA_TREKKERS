@@ -32,6 +32,22 @@ export async function submitLiveBooking(bookingData) {
   if (!res.ok) {
     throw new Error(data.error || 'Failed to submit booking');
   }
+
+  // Background Mirror Replication to Secondary Backup Server (fire-and-forget)
+  try {
+    const backupUrl = localStorage.getItem('shivchhatra_backup_api_url');
+    if (backupUrl) {
+      const endpoint = backupUrl.endsWith('/api') ? `${backupUrl}/bookings` : `${backupUrl}/api/bookings`;
+      fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      }).catch(() => {});
+    }
+  } catch (e) {
+    // Ignore secondary sync issues on client
+  }
+
   return data;
 }
 
