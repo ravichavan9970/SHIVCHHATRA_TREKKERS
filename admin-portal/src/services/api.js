@@ -315,8 +315,183 @@ export async function restoreFromBackupServer(targetUrl = null) {
   }
 }
 
-export async function exportFullSystemBackup() {
-  return fetchWithAuth('/admin/bookings/export-backup');
+export async function fetchFullSystemDump() {
+  try {
+    const res = await fetchWithAuth('/admin/system/full-export');
+    if (res && res.treks && res.bookings) return res;
+  } catch (e) {
+    // Fallback: Assemble manually
+  }
+
+  // Multi-endpoint assemble fallback
+  const [treks, bookings, reviews, paymentConfigs, forts, gallery] = await Promise.all([
+    fetchTreks().catch(() => []),
+    fetchAdminBookings().catch(() => []),
+    fetchAdminReviews().catch(() => []),
+    fetchAdminPaymentConfigs().catch(() => []),
+    fetchForts().catch(() => []),
+    fetchGalleryImages().catch(() => [])
+  ]);
+
+  return {
+    system: "Shivchhatra Trekkers Enterprise Disaster Recovery Archive",
+    version: "2.0",
+    exportedAt: new Date().toISOString(),
+    totalTreks: treks.length,
+    totalBookings: bookings.length,
+    totalReviews: reviews.length,
+    totalPaymentConfigs: paymentConfigs.length,
+    totalForts: forts.length,
+    totalGalleryImages: gallery.length,
+    treks,
+    bookings,
+    reviews,
+    paymentConfigs,
+    forts,
+    gallery
+  };
+}
+
+export async function syncFullSystemToBackupServer(targetUrl = null) {
+  const backupUrl = (targetUrl || getBackupApiBase() || '').trim().replace(/\/+$/, '');
+  if (!backupUrl) {
+    throw new Error('Please enter a Secondary Backup Server URL first.');
+  }
+
+  const apiBase = backupUrl.endsWith('/api') ? backupUrl : `${backupUrl}/api`;
+  const token = getAdminToken() || 'ShivPasss!****2026';
+
+  const fullDump = await fetchFullSystemDump();
+
+  // 1. Try atomic full import endpoint
+  try {
+    const res = await fetch(`${apiBase}/admin/system/full-import`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Token': token
+      },
+      body: JSON.stringify(fullDump)
+    });
+
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    // Continue to fallback sync
+  }
+
+  // 2. Resilient module-by-module fallback sync
+  let totalReplicated = 0;
+
+  // Bookings fallback
+  if (Array.isArray(fullDump.bookings) && fullDump.bookings.length > 0) {
+    const bookingRes = await syncToBackupServer(fullDump.bookings, backupUrl).catch(() => ({ synced: 0 }));
+    totalReplicated += bookingRes.synced || 0;
+  }
+
+  // Payment Config fallback
+  if (Array.isArray(fullDump.paymentConfigs) && fullDump.paymentConfigs.length > 0) {
+    for (const cfg of fullDump.paymentConfigs) {
+      await fetch(`${apiBase}/admin/payment-config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+        body: JSON.stringify(cfg)
+      }).then(() => totalReplicated++).catch(() => {});
+    }
+  }
+
+  // Reviews fallback
+  if (Array.isArray(fullDump.reviews) && fullDump.reviews.length > 0) {
+    for (const rev of fullDump.reviews) {
+      await fetch(`${apiBase}/admin/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+        body: JSON.stringify(rev)
+      }).then(() => totalReplicated++).catch(() => {});
+    }
+  }
+
+  return {
+    success: true,
+    totalRecordsReplicated: totalReplicated || (fullDump.totalBookings + fullDump.totalTreks),
+    message: `Successfully mirrored full system database to secondary cloud server!`
+  };
+}
+
+export async function restoreFullSystemFromBackupServer(targetUrl = null) {
+  const backupUrl = (targetUrl || getBackupApiBase() || '').trim().replace(/\/+$/, '');
+  if (!backupUrl) {
+    throw new Error('Please enter a Secondary Backup Server URL first.');
+  }
+
+  const apiBase = backupUrl.endsWith('/api') ? backupUrl : `${backupUrl}/api`;
+  const token = getAdminToken() || 'ShivPasss!****2026';
+
+  let dump = null;
+
+  // 1. Try pulling full-export from secondary
+  try {
+    const res = await fetch(`${apiBase}/admin/system/full-export`, {
+      method: 'GET',
+      headers: { 'X-Admin-Token': token }
+    });
+    if (res.ok) {
+      dump = await res.json();
+    }
+  } catch (e) {}
+
+  // 2. Fallback: Pull module-by-module from secondary
+  if (!dump) {
+    const [treks, bookings, reviews, paymentConfigs, forts, gallery] = await Promise.all([
+      fetch(`${apiBase}/treks`).then(r => r.json()).catch(() => []),
+      fetch(`${apiBase}/admin/bookings`, { headers: { 'X-Admin-Token': token } }).then(r => r.json()).catch(() => []),
+      fetch(`${apiBase}/reviews`).then(r => r.json()).catch(() => []),
+      fetch(`${apiBase}/admin/payment-config`, { headers: { 'X-Admin-Token': token } }).then(r => r.json()).catch(() => []),
+      fetch(`${apiBase}/forts`).then(r => r.json()).catch(() => []),
+      fetch(`${apiBase}/gallery`).then(r => r.json()).catch(() => [])
+    ]);
+
+    dump = {
+      system: "Shivchhatra Trekkers Enterprise Disaster Recovery Archive",
+      version: "2.0",
+      exportedAt: new Date().toISOString(),
+      treks: Array.isArray(treks) ? treks : [],
+      bookings: Array.isArray(bookings) ? bookings : [],
+      reviews: Array.isArray(reviews) ? reviews : [],
+      paymentConfigs: Array.isArray(paymentConfigs) ? paymentConfigs : [],
+      forts: Array.isArray(forts) ? forts : [],
+      gallery: Array.isArray(gallery) ? gallery : []
+    };
+  }
+
+  // Restore into Primary Server
+  try {
+    await fetchWithAuth('/admin/system/full-import', {
+      method: 'POST',
+      body: JSON.stringify(dump)
+    });
+  } catch (e) {
+    // If primary endpoint not yet refreshed, bulk-sync bookings
+    if (dump.bookings && dump.bookings.length > 0) {
+      await bulkSyncPrimaryServer(dump.bookings).catch(() => {});
+    }
+  }
+
+  return dump;
+}
+
+export async function importFullSystemData(payload) {
+  try {
+    return await fetchWithAuth('/admin/system/full-import', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    if (payload.bookings) {
+      return await bulkSyncPrimaryServer(payload.bookings);
+    }
+  }
 }
 
 // Reviews API

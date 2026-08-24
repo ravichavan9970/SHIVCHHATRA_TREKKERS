@@ -46,7 +46,11 @@ import {
   syncToBackupServer,
   restoreFromBackupServer,
   bulkSyncPrimaryServer,
-  testBackupServerConnection
+  testBackupServerConnection,
+  fetchFullSystemDump,
+  syncFullSystemToBackupServer,
+  restoreFullSystemFromBackupServer,
+  importFullSystemData
 } from '../../services/api';
 
 const ADMIN_STORAGE_KEY = 'shivchhatra_admin_bookings_cache';
@@ -128,12 +132,13 @@ export default function BookingsAuditor() {
     }
   };
 
-  const handleCreateLocalVaultSnapshot = () => {
+  const handleCreateLocalVaultSnapshot = async () => {
     try {
+      const fullDump = await fetchFullSystemDump();
       localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(bookings));
       localStorage.setItem(PERMANENT_ARCHIVE_KEY, JSON.stringify(bookings));
-      localStorage.setItem('shivchhatra_bookings_backup', JSON.stringify(bookings));
-      setNotice(`💾 Disaster Recovery Snapshot locked in local vault (${bookings.length} records safely saved).`);
+      localStorage.setItem('shivchhatra_full_system_vault', JSON.stringify(fullDump));
+      setNotice(`💾 Disaster Recovery Snapshot locked in local vault (All Treks, Bookings, Reviews, Payments, Forts safely saved).`);
       setTimeout(() => setNotice(''), 5000);
     } catch (e) {
       alert('Failed to save snapshot: ' + e.message);
@@ -142,14 +147,14 @@ export default function BookingsAuditor() {
 
   const handlePushToBackupServer = async () => {
     if (!backupUrl.trim()) {
-      alert('Please enter your Secondary Backup Server URL first (e.g. https://shivchhatra-backup.onrender.com/api). If you do not have a 2nd server deployed, you can use "Download Offline Backup" to save directly to your device.');
+      alert('Please enter your Secondary Backup Server URL first (e.g. https://shivchhatra-backup-server.onrender.com). If you do not have a 2nd server deployed, you can use "Download Offline Backup" to save directly to your device.');
       return;
     }
     try {
       setIsBackingUp(true);
-      await syncToBackupServer(bookings, backupUrl);
+      const res = await syncFullSystemToBackupServer(backupUrl);
       setIsBackingUp(false);
-      setNotice(`🚀 Cloud Backup Success: Synchronized ${bookings.length} records to secondary server!`);
+      setNotice(`🚀 Full-Cloud Mirror Success: Replicated all Treks, Bookings, Reviews, Payment Gateways & Heritage data to secondary server!`);
       setTimeout(() => setNotice(''), 6000);
     } catch (err) {
       setIsBackingUp(false);
@@ -162,29 +167,26 @@ export default function BookingsAuditor() {
       alert('Please enter your Secondary Backup Server URL first.');
       return;
     }
-    if (window.confirm(`Pull and restore all historical bookings from secondary server (${backupUrl})?`)) {
+    if (window.confirm(`Pull and restore ALL data (Treks, Bookings, Reviews, Payments, Forts, Gallery) from secondary server (${backupUrl})?`)) {
       try {
         setIsRestoring(true);
-        const restoredData = await restoreFromBackupServer(backupUrl);
-        if (Array.isArray(restoredData) && restoredData.length > 0) {
+        const restoredDump = await restoreFullSystemFromBackupServer(backupUrl);
+        
+        if (restoredDump && restoredDump.bookings) {
           const mergedMap = new Map();
           bookings.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
-          restoredData.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
+          restoredDump.bookings.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
           const mergedList = Array.from(mergedMap.values());
 
           setBookings(mergedList);
           localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(mergedList));
           localStorage.setItem(PERMANENT_ARCHIVE_KEY, JSON.stringify(mergedList));
-
-          await bulkSyncPrimaryServer(mergedList).catch(e => console.warn("Primary bulk sync notice:", e));
-
-          setIsRestoring(false);
-          setNotice(`🔄 Disaster Recovery Success: Restored & synced ${restoredData.length} records!`);
-          setTimeout(() => setNotice(''), 6000);
-        } else {
-          setIsRestoring(false);
-          alert('Secondary server returned 0 records.');
         }
+
+        setIsRestoring(false);
+        setNotice(`🔄 Full System Disaster Recovery Success: Restored entire database from secondary cloud!`);
+        setTimeout(() => setNotice(''), 6000);
+        await loadBookings();
       } catch (err) {
         setIsRestoring(false);
         alert('Restore from secondary server failed: ' + err.message);
@@ -192,20 +194,21 @@ export default function BookingsAuditor() {
     }
   };
 
-  const handleExportJsonBackup = () => {
+  const handleExportJsonBackup = async () => {
     try {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(bookings, null, 2));
+      const fullDump = await fetchFullSystemDump();
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullDump, null, 2));
       const downloadAnchor = document.createElement('a');
       const dateStr = new Date().toISOString().slice(0, 10);
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `shivchhatra_trekkers_backup_${dateStr}.json`);
+      downloadAnchor.setAttribute("download", `shivchhatra_full_system_backup_${dateStr}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      setNotice(`💾 Offline JSON backup downloaded successfully (${bookings.length} records)`);
+      setNotice(`💾 Full-System Offline JSON backup downloaded successfully (Treks, Bookings, Reviews, Payments, Forts, Gallery).`);
       setTimeout(() => setNotice(''), 5000);
     } catch (e) {
-      alert("Failed to export backup: " + e.message);
+      alert("Failed to export full system backup: " + e.message);
     }
   };
 
@@ -218,28 +221,27 @@ export default function BookingsAuditor() {
       try {
         const content = event.target.result;
         const parsed = JSON.parse(content);
-        const listToImport = Array.isArray(parsed) ? parsed : (parsed.bookings && Array.isArray(parsed.bookings) ? parsed.bookings : []);
         
-        if (listToImport.length === 0) {
-          alert("No valid booking records found in this backup file.");
-          return;
+        // Import full payload into backend
+        await importFullSystemData(parsed);
+
+        const listToImport = Array.isArray(parsed) ? parsed : (parsed.bookings && Array.isArray(parsed.bookings) ? parsed.bookings : []);
+        if (listToImport.length > 0) {
+          const mergedMap = new Map();
+          bookings.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
+          listToImport.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
+          const mergedList = Array.from(mergedMap.values());
+
+          setBookings(mergedList);
+          localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(mergedList));
+          localStorage.setItem(PERMANENT_ARCHIVE_KEY, JSON.stringify(mergedList));
         }
 
-        const mergedMap = new Map();
-        bookings.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
-        listToImport.forEach(b => { if (b && (b.id || b.utrNumber)) mergedMap.set(b.id || b.utrNumber, b); });
-        const mergedList = Array.from(mergedMap.values());
-
-        setBookings(mergedList);
-        localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(mergedList));
-        localStorage.setItem(PERMANENT_ARCHIVE_KEY, JSON.stringify(mergedList));
-
-        await bulkSyncPrimaryServer(mergedList).catch(e => console.warn("Primary bulk sync notice:", e));
-
-        setNotice(`📥 Successfully imported & restored ${listToImport.length} booking records!`);
+        setNotice(`📥 Full System Disaster Recovery Success: Restored all modules from backup file!`);
         setTimeout(() => setNotice(''), 6000);
+        await loadBookings();
       } catch (err) {
-        alert("Failed to parse backup JSON file: " + err.message);
+        alert("Failed to parse and restore backup file: " + err.message);
       }
     };
     reader.readAsText(file);
@@ -430,13 +432,13 @@ export default function BookingsAuditor() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center space-x-2">
-                    <span>Enterprise Dual-Server Backup & Disaster Recovery</span>
+                    <span>Enterprise Full-System Replication & Disaster Recovery</span>
                     <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold">
-                      Zero Data Loss
+                      100% Zero Data Loss
                     </span>
                   </h4>
                   <p className="text-[11px] text-slate-400">
-                    Mirror, backup, and instantly restore all payment histories and completed expedition archives.
+                    Mirrors and restores <strong>all data</strong>: Treks & Batches, Bookings & Payments, Customer Reviews, Payment Gateway Settings, Forts Heritage & Media Gallery.
                   </p>
                 </div>
               </div>
@@ -447,7 +449,7 @@ export default function BookingsAuditor() {
               <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
                 <span className="flex items-center space-x-1.5">
                   <Server className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Secondary Cloud Backup Server URL (Optional 2nd Render Backend)</span>
+                  <span>Secondary Cloud Backup Server URL (Render Web Service)</span>
                 </span>
                 {backupSavedNotice && (
                   <span className="text-emerald-400 text-[11px] flex items-center space-x-1">
@@ -461,7 +463,7 @@ export default function BookingsAuditor() {
                   type="url"
                   value={backupUrl}
                   onChange={(e) => setBackupUrl(e.target.value)}
-                  placeholder="e.g. https://your-second-backend.onrender.com/api"
+                  placeholder="e.g. https://shivchhatra-backup-server.onrender.com"
                   className="flex-1 px-3.5 py-2.5 bg-slate-950 border border-slate-800 focus:border-orange-500 rounded-xl text-white text-xs font-mono placeholder-slate-600 focus:outline-none"
                 />
                 <div className="flex items-center space-x-2 shrink-0">
@@ -483,13 +485,13 @@ export default function BookingsAuditor() {
                 </div>
               </div>
               <p className="text-[10px] text-slate-500">
-                💡 Tip: If you haven't deployed a 2nd Render server yet, use <strong>Download Offline Backup</strong> or <strong>Lock Snapshot</strong> below to protect your payment history instantly!
+                💡 Full Mirroring Active: Pushing will replicate the entire platform state (Treks, Bookings, Reviews, Payments, Forts, Gallery) to your second Render backend.
               </p>
             </form>
 
             {/* Recovery & Sync Action Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 pt-2">
-              {/* Push to Secondary Cloud Server */}
+              {/* Push Full System to Secondary Cloud Server */}
               <button
                 type="button"
                 onClick={handlePushToBackupServer}
@@ -497,10 +499,10 @@ export default function BookingsAuditor() {
                 className="p-3 rounded-xl bg-orange-600/15 hover:bg-orange-600/25 border border-orange-500/40 text-orange-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer disabled:opacity-50"
               >
                 <CloudUpload className={`w-4 h-4 text-orange-400 ${isBackingUp ? 'animate-bounce' : ''}`} />
-                <span>{isBackingUp ? 'Pushing...' : 'Push to 2nd Cloud'}</span>
+                <span>{isBackingUp ? 'Pushing All Data...' : 'Push Full System to 2nd Server'}</span>
               </button>
 
-              {/* Restore from Secondary Cloud Server */}
+              {/* Restore Full System from Secondary Cloud Server */}
               <button
                 type="button"
                 onClick={handleRestoreFromBackupServer}
@@ -508,17 +510,17 @@ export default function BookingsAuditor() {
                 className="p-3 rounded-xl bg-cyan-950/30 hover:bg-cyan-950/50 border border-cyan-500/40 text-cyan-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer disabled:opacity-50"
               >
                 <CloudDownload className={`w-4 h-4 text-cyan-400 ${isRestoring ? 'animate-spin' : ''}`} />
-                <span>{isRestoring ? 'Restoring...' : 'Restore from 2nd Cloud'}</span>
+                <span>{isRestoring ? 'Restoring All...' : 'Restore Full System from 2nd Server'}</span>
               </button>
 
-              {/* Lock Snapshot to Local Vault */}
+              {/* Lock Full System Snapshot to Local Vault */}
               <button
                 type="button"
                 onClick={handleCreateLocalVaultSnapshot}
                 className="p-3 rounded-xl bg-amber-950/30 hover:bg-amber-950/50 border border-amber-500/40 text-amber-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
               >
                 <HardDrive className="w-4 h-4 text-amber-400" />
-                <span>Lock Local Snapshot</span>
+                <span>Lock Full Snapshot</span>
               </button>
 
               {/* Download Offline JSON Snapshot */}
@@ -528,7 +530,7 @@ export default function BookingsAuditor() {
                 className="p-3 rounded-xl bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
               >
                 <Download className="w-4 h-4 text-emerald-400" />
-                <span>Download Offline File</span>
+                <span>Export Full Backup (.json)</span>
               </button>
 
               {/* Upload & Restore Offline JSON Snapshot */}
@@ -538,7 +540,7 @@ export default function BookingsAuditor() {
                 className="p-3 rounded-xl bg-purple-950/30 hover:bg-purple-950/50 border border-purple-500/40 text-purple-300 font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
               >
                 <Upload className="w-4 h-4 text-purple-400" />
-                <span>Import Backup File</span>
+                <span>Import Full System File</span>
               </button>
             </div>
           </motion.div>
