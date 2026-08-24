@@ -1,6 +1,9 @@
 # 🚩 Shivchhatra Trekkers (शिवछत्र ट्रेकर्स)
 ### Enterprise Sahyadri Adventure, Heritage Fort Expeditions & Disaster Recovery Platform
 
+🌐 **Live Public Portal**: [https://shivchhatra-trekkers.vercel.app](https://shivchhatra-trekkers.vercel.app)
+
+[![Live Website](https://img.shields.io/badge/Live%20Website-shivchhatra--trekkers.vercel.app-2ea44f?style=for-the-badge&logo=vercel)](https://shivchhatra-trekkers.vercel.app)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.3-brightgreen.svg?logo=springboot)](https://spring.io/projects/spring-boot)
 [![Java 21](https://img.shields.io/badge/Java-21%20LTS-orange.svg?logo=openjdk)](https://openjdk.org/)
 [![React](https://img.shields.io/badge/React-19.0-blue.svg?logo=react)](https://react.dev/)
