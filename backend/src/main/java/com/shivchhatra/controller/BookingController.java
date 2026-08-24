@@ -213,9 +213,8 @@ public class BookingController {
     public ResponseEntity<?> deleteBooking(@PathVariable String id) {
         if (bookingRepository.existsById(id)) {
             bookingRepository.deleteById(id);
-            return ResponseEntity.ok(Map.of("success", true));
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(Map.of("success", true, "id", id));
     }
 
     @PostMapping("/admin/bookings/bulk-sync")

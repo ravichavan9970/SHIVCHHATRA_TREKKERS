@@ -146,9 +146,16 @@ export async function completeAdminBooking(id, note = 'Expedition completed succ
 }
 
 export async function deleteAdminBooking(id) {
-  return fetchWithAuth(`/admin/bookings/${id}`, {
-    method: 'DELETE'
-  });
+  try {
+    return await fetchWithAuth(`/admin/bookings/${id}`, {
+      method: 'DELETE'
+    });
+  } catch (err) {
+    if (err.message && err.message.includes('404')) {
+      return { success: true, message: 'Record already removed from database' };
+    }
+    throw err;
+  }
 }
 
 export function getBackupApiBase() {

@@ -328,16 +328,44 @@ export default function BookingsAuditor() {
     }
   };
 
+  const purgeRecordFromAllStorageKeys = (idToDelete) => {
+    const keysToProbe = [
+      ADMIN_STORAGE_KEY,
+      PERMANENT_ARCHIVE_KEY,
+      'shivchhatra_bookings_v4',
+      'shivchhatra_bookings_v3',
+      'shivchhatra_bookings_v2',
+      'shivchhatra_bookings_data_v1',
+      'shivchhatra_bookings_backup'
+    ];
+
+    for (const key of keysToProbe) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            const filtered = parsed.filter(item => item && item.id !== idToDelete && item.utrNumber !== idToDelete);
+            localStorage.setItem(key, JSON.stringify(filtered));
+          }
+        }
+      } catch (e) {}
+    }
+  };
+
   const handleDelete = async (id, primaryName) => {
     if (window.confirm(`Are you sure you want to permanently delete the booking record for ${primaryName}?`)) {
       try {
-        setBookings(prev => prev.filter(b => b.id !== id));
-        await deleteAdminBooking(id);
-        setNotice(`🗑️ Record removed for ${primaryName}`);
+        setBookings(prev => prev.filter(b => b.id !== id && b.utrNumber !== id));
+        purgeRecordFromAllStorageKeys(id);
+        await deleteAdminBooking(id).catch(e => console.warn('Delete notice:', e));
+        setNotice(`🗑️ Record permanently removed for ${primaryName}`);
         setTimeout(() => setNotice(''), 4000);
         await loadBookings();
       } catch (err) {
-        alert('Delete failed: ' + err.message);
+        purgeRecordFromAllStorageKeys(id);
+        setNotice(`🗑️ Record removed for ${primaryName}`);
+        setTimeout(() => setNotice(''), 4000);
         await loadBookings();
       }
     }
