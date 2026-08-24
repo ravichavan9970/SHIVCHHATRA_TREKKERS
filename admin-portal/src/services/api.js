@@ -324,31 +324,33 @@ export async function fetchFullSystemDump() {
   }
 
   // Multi-endpoint assemble fallback
-  const [treks, bookings, reviews, paymentConfigs, forts, gallery] = await Promise.all([
-    fetchTreks().catch(() => []),
+  const [treks, bookings, reviews, paymentConfig, forts, gallery] = await Promise.all([
+    fetchAdminTreks().catch(() => []),
     fetchAdminBookings().catch(() => []),
     fetchAdminReviews().catch(() => []),
-    fetchAdminPaymentConfigs().catch(() => []),
-    fetchForts().catch(() => []),
-    fetchGalleryImages().catch(() => [])
+    fetchAdminPaymentConfig().catch(() => null),
+    fetchAdminForts().catch(() => []),
+    fetchAdminGallery().catch(() => [])
   ]);
+
+  const paymentConfigs = paymentConfig ? [paymentConfig] : [];
 
   return {
     system: "Shivchhatra Trekkers Enterprise Disaster Recovery Archive",
     version: "2.0",
     exportedAt: new Date().toISOString(),
-    totalTreks: treks.length,
-    totalBookings: bookings.length,
-    totalReviews: reviews.length,
+    totalTreks: Array.isArray(treks) ? treks.length : 0,
+    totalBookings: Array.isArray(bookings) ? bookings.length : 0,
+    totalReviews: Array.isArray(reviews) ? reviews.length : 0,
     totalPaymentConfigs: paymentConfigs.length,
-    totalForts: forts.length,
-    totalGalleryImages: gallery.length,
-    treks,
-    bookings,
-    reviews,
+    totalForts: Array.isArray(forts) ? forts.length : 0,
+    totalGalleryImages: Array.isArray(gallery) ? gallery.length : 0,
+    treks: Array.isArray(treks) ? treks : [],
+    bookings: Array.isArray(bookings) ? bookings : [],
+    reviews: Array.isArray(reviews) ? reviews : [],
     paymentConfigs,
-    forts,
-    gallery
+    forts: Array.isArray(forts) ? forts : [],
+    gallery: Array.isArray(gallery) ? gallery : []
   };
 }
 
