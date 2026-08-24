@@ -23,6 +23,11 @@ public class BookingController {
     @Autowired
     private TrekRepository trekRepository;
 
+    @GetMapping("/health")
+    public ResponseEntity<?> healthCheck() {
+        return ResponseEntity.ok(Collections.singletonMap("status", "UP"));
+    }
+
     @GetMapping("/admin/bookings")
     public List<Booking> getAllBookings() {
         return bookingRepository.findAllByOrderBySubmittedAtDesc();

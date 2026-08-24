@@ -13,12 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 1)
+@Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class RateLimitingFilter implements Filter {
 
     private static final Map<String, RequestBucket> clientBuckets = new ConcurrentHashMap<>();
-    private static final int MAX_REQUESTS_PER_MINUTE = 120; // Normal browsing
-    private static final int MAX_POST_REQUESTS_PER_MINUTE = 30; // Submission endpoints
+    private static final int MAX_REQUESTS_PER_MINUTE = 600; // Generous for mobile CGNAT pools & polling
+    private static final int MAX_POST_REQUESTS_PER_MINUTE = 60; // Submission anti-spam throttle
 
     private static class RequestBucket {
         long windowStart = System.currentTimeMillis();

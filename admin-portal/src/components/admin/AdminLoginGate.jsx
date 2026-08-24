@@ -29,16 +29,17 @@ export default function AdminLoginGate({ onLoginSuccess }) {
         const apiBase = import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:8080/api' : 'https://shivchhatra-trekkers-bjqg.onrender.com/api');
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         
-        const res = await fetch(`${apiBase}/treks`, { 
+        const res = await fetch(`${apiBase}/health`, { 
           method: 'GET',
           signal: controller.signal
-        });
+        }).catch(() => fetch(`${apiBase}/treks`, { method: 'GET', signal: controller.signal }));
+        
         clearTimeout(timeoutId);
 
         if (isMounted) {
-          if (res.ok || res.status < 500) {
+          if (res && (res.ok || res.status < 500)) {
             setServerState('online');
           } else {
             setServerState('connecting');
